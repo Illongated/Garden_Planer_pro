@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .irrigation_data import IRRIGATION_KNOWLEDGE_BASE
 from .layout_engine import LayoutEngine
+from .irrigation_layout_engine import IrrigationLayoutEngine
 
 # --- Plant Data ---
 PLANTS = {
@@ -66,14 +67,21 @@ async def update_garden_layout(sid, data):
 
     await sio.emit('update_plant_quantities', plant_quantities, to=sid)
 
-    # 3. Generate layout
-    garden_width = int(garden_area ** 0.5 * 10) # in 10cm units
+    # 3. Generate plant layout
+    garden_width = int(garden_area ** 0.5 * 10)
     garden_depth = int(garden_area ** 0.5 * 10)
     layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS)
     layout_engine.generate_layout(plant_quantities)
     plant_positions = layout_engine.get_plant_positions()
 
-    await sio.emit('update_layout', {"positions": plant_positions})
+    # 4. Generate irrigation layout
+    irrigation_engine = IrrigationLayoutEngine(plant_positions, garden_width, garden_depth)
+    irrigation_layout = irrigation_engine.generate_layout()
+
+    await sio.emit('update_layout', {
+        "plant_positions": plant_positions,
+        "irrigation_layout": irrigation_layout
+    })
 
 
 # ... (other event handlers remain the same for now)
