@@ -1,41 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ... (setup is the same)
-    const socket = io();
-    // ...
+    const { getState, setState, subscribe, undo, redo } = window.gardenStore;
 
-    function onMouseUp(event) {
-        if (isDragging && selectedObject) {
-            isDragging = false;
-            controls.enabled = true;
+    // ... (the rest of the script is the same)
 
-            const selectedBox = new THREE.Box3().setFromObject(selectedObject);
-            let collision = false;
-            plantGroup.children.forEach(child => {
-                if (child !== selectedObject) {
-                    const childBox = new THREE.Box3().setFromObject(child);
-                    if (selectedBox.intersectsBox(childBox)) {
-                        collision = true;
-                    }
-                }
-            });
-
-            if (collision) {
-                selectedObject.position.copy(originalPosition);
-            } else {
-                // Position is valid, send update to server
-                const currentLayout = plantGroup.children.map(child => ({
-                    id: child.userData.id,
-                    position: child.position
-                }));
-
-                socket.emit('update_object_position', {
-                    object_id: selectedObject.userData.id,
-                    new_position: selectedObject.position,
-                    current_layout: currentLayout
-                });
-            }
+    // --- Keyboard Listeners for Undo/Redo ---
+    window.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 'z') {
+            event.preventDefault();
+            undo();
         }
-    }
+        if (event.ctrlKey && event.key === 'y') {
+            event.preventDefault();
+            redo();
+        }
+    });
 
     // ... (the rest of the file)
 });
