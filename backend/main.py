@@ -1,6 +1,8 @@
 import socketio
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from .irrigation_data import IRRIGATION_KNOWLEDGE_BASE
+from .layout_engine import LayoutEngine
 
 # --- Plant Data ---
 PLANTS = {
@@ -17,14 +19,16 @@ app = FastAPI()
 sio = socketio.AsyncServer(async_mode="asgi")
 socket_app = socketio.ASGIApp(sio)
 
-# Mount the frontend directory to serve static files
+# Mount static file directories
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
+app.mount("/assets", StaticFiles(directory="frontend/assets"), name="assets")
+
 
 @sio.event
 async def connect(sid, environ):
     print(f"connect {sid}")
-    # Send initial plant data
     await sio.emit('plant_data', PLANTS, to=sid)
+    await sio.emit('irrigation_knowledge_base', IRRIGATION_KNOWLEDGE_BASE, to=sid)
 
 
 @sio.event
@@ -32,68 +36,61 @@ async def disconnect(sid):
     print(f"disconnect {sid}")
 
 
-@sio.on("update_garden_area")
-async def update_garden_area(sid, data):
-    area = data.get("area", 0)
-    if area > 0:
-        max_plants = {
-            plant_id: {"max": int(area / plant_info["space_m2"])}
-            for plant_id, plant_info in PLANTS.items()
-        }
-        await sio.emit('update_max_plants', max_plants, to=sid)
+@sio.on("update_garden_layout")
+async def update_garden_layout(sid, data):
+    garden_area = data.get("garden_area", 10)
+    plant_priorities = data.get("plant_priorities", {})
+    plant_locks = data.get("plant_locks", {})
 
-@sio.on("update_plant_count")
-async def update_plant_count(sid, data):
-    garden_area = data.get("garden_area", 0)
-    plant_counts = data.get("plant_counts", {})
-    irrigation_type = data.get("irrigation_type", "drip")
+    plant_quantities = {plant_id: 0 for plant_id in PLANTS}
+    remaining_area = garden_area
 
-    if garden_area > 0:
-        used_area = 0
-        total_flow_rate = 0
-        pipe_length = 0
-        for plant_id, count in plant_counts.items():
-            used_area += count * PLANTS[plant_id]["space_m2"]
-            total_flow_rate += count * PLANTS[plant_id]["water_L_per_hour"]
-            if irrigation_type == "drip":
-                pipe_length += count * 1 # 1 meter of pipe per plant
-            else:
-                pipe_length += count * 0.5 # 0.5 meters of pipe per plant for sprinklers
+    # 1. Allocate locked plants first
+    for plant_id, is_locked in plant_locks.items():
+        if is_locked:
+            quantity = 5
+            area_needed = quantity * PLANTS[plant_id]["space_m2"]
+            if remaining_area >= area_needed:
+                plant_quantities[plant_id] = quantity
+                remaining_area -= area_needed
 
-        remaining_area = garden_area - used_area
+    # 2. Distribute remaining area based on priority
+    total_priority = sum(plant_priorities.values())
+    if total_priority > 0:
+        for plant_id, priority in plant_priorities.items():
+            if not plant_locks.get(plant_id, False):
+                proportion = priority / total_priority
+                available_area_for_plant = remaining_area * proportion
+                quantity = int(available_area_for_plant / PLANTS[plant_id]["space_m2"])
+                plant_quantities[plant_id] += quantity
 
-        if remaining_area < 0:
-            remaining_area = 0
+    await sio.emit('update_plant_quantities', plant_quantities, to=sid)
 
-        updated_max_plants = {}
-        for plant_id, plant_info in PLANTS.items():
-            current_count = plant_counts.get(plant_id, 0)
-            additional_plants = int(remaining_area / plant_info["space_m2"])
-            updated_max_plants[plant_id] = {"max": current_count + additional_plants}
+    # 3. Generate layout
+    garden_width = int(garden_area ** 0.5 * 10) # in 10cm units
+    garden_depth = int(garden_area ** 0.5 * 10)
+    layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS)
+    layout_engine.generate_layout(plant_quantities)
+    plant_positions = layout_engine.get_plant_positions()
 
-        await sio.emit('update_max_plants', updated_max_plants, to=sid)
-        await sio.emit('pump_flow_results', {"flow_rate": total_flow_rate}, to=sid)
-        await sio.emit('pipe_length_results', {"length": pipe_length}, to=sid)
+    await sio.emit('update_layout', {"positions": plant_positions})
 
 
+# ... (other event handlers remain the same for now)
 @sio.on("calculate_irrigation")
 async def calculate_irrigation(sid, data):
-    area = data.get("area", 0)
-    irrigation_type = data.get("irrigation_type", "drip")
-    zones = 0
-    if area > 0:
-        if irrigation_type == "drip":
-            zones = max(1, int(area / 20)) # 1 zone per 20 m2
-        elif irrigation_type == "sprinkler":
-            zones = max(1, int(area / 10)) # 1 zone per 10 m2
+    recommended_system = "drip_emitter"
+    explanation = IRRIGATION_KNOWLEDGE_BASE[recommended_system]
 
-    await sio.emit("irrigation_results", {"zones": zones})
+    await sio.emit("irrigation_results", {
+        "recommended_system": recommended_system,
+        "explanation": explanation
+    })
 
 @sio.on("calculate_shading")
 async def calculate_shading(sid, data):
     sun_angle = data.get("sun_angle", 180)
 
-    # Determine sunny and shady sides
     if 90 < sun_angle < 270:
         sunny_side = "South"
         shady_side = "North"
@@ -101,7 +98,6 @@ async def calculate_shading(sid, data):
         sunny_side = "North"
         shady_side = "South"
 
-    # Recommend plants
     full_sun_plants = [p["name"] for p in PLANTS.values() if p["sun_preference"] == "full_sun"]
     partial_shade_plants = [p["name"] for p in PLANTS.values() if p["sun_preference"] == "partial_shade"]
 
@@ -111,6 +107,7 @@ async def calculate_shading(sid, data):
     }
 
     await sio.emit("shading_results", recommendations)
+
 
 # Mount the socket.io app
 app.mount('/socket.io', socket_app)

@@ -21,8 +21,9 @@
                 <div class="form-group">
                     <label for="irrigation-type">Irrigation Type:</label>
                     <select id="irrigation-type">
-                        <option value="drip">Drip</option>
-                        <option value="sprinkler">Sprinkler</option>
+                        <option value="drip_emitter">Drip Emitter</option>
+                        <option value="micro_sprayer">Micro-Sprayer</option>
+                        <option value="soaker_hose">Soaker Hose</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -32,15 +33,21 @@
             </div>
             <div class="plants-section">
                 <h2>Plants</h2>
-                <div id="plant-sliders"></div>
+                <div id="plant-controls"></div>
             </div>
             <div class="results-section">
-                <h2>Results</h2>
-                <div id="results"></div>
+                <h2>Garden Layout</h2>
+                <div id="canvas-container" style="width: 100%; height: 500px; border: 1px solid #ddd;"></div>
+            </div>
+            <div class="info-section">
+                <h2>System Recommendations</h2>
+                <div id="irrigation-info"></div>
             </div>
         </div>
     </main>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

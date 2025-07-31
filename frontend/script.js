@@ -1,143 +1,136 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Socket.IO Setup ---
     const socket = io();
-    const plantSliders = document.getElementById('plant-sliders');
+    const plantControlsDiv = document.getElementById('plant-controls');
     const gardenAreaInput = document.getElementById('garden-area');
     const irrigationTypeInput = document.getElementById('irrigation-type');
     const sunAngleInput = document.getElementById('sun-angle');
-    const resultsDiv = document.getElementById('results');
+    const irrigationInfoDiv = document.getElementById('irrigation-info');
 
-    let irrigationZones = 0;
-    let pumpFlowRate = 0;
-    let pipeLength = 0;
-    let shadingRecs = {};
+    // --- Three.js Setup ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf4f4f4);
+    const aspect = container.clientWidth / container.clientHeight;
+    const d = 20;
+    const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
 
-    function updateResults() {
-        let shadingHtml = '';
-        if (shadingRecs.sunny_side) {
-            shadingHtml = `
-                <h3>Sunlight Recommendations</h3>
-                <p><strong>${shadingRecs.sunny_side.side}-facing (Sunny):</strong> ${shadingRecs.sunny_side.plants.join(', ')}</p>
-                <p><strong>${shadingRecs.shady_side.side}-facing (Shady):</strong> ${shadingRecs.shady_side.plants.join(', ')}</p>
-            `;
-        }
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
 
-        resultsDiv.innerHTML = `
-            <h3>Irrigation</h3>
-            <p>Recommended Zones: ${irrigationZones}</p>
-            <h3>Pump</h3>
-            <p>Recommended Flow Rate: ${pumpFlowRate.toFixed(2)} L/h</p>
-            <h3>Piping</h3>
-            <p>Estimated Pipe Length: ${pipeLength.toFixed(2)} m</p>
-            ${shadingHtml}
-        `;
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    camera.position.set(20, 20, 20);
+    camera.lookAt(scene.position);
+    controls.update();
+
+    const plantGroup = new THREE.Group();
+    scene.add(plantGroup);
+
+    const textureLoader = new THREE.TextureLoader();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
     }
+    animate();
 
+    // --- Data Store ---
+    let irrigationKnowledgeBase = {};
+
+    // --- Event Listeners and Socket Handlers ---
     socket.on('connect', () => {
         console.log('Connected to server');
-        sendGardenArea();
-        sendIrrigationData();
-        sendSunAngleData();
-        updateResults();
+        sendGardenData();
+    });
+
+    socket.on('irrigation_knowledge_base', (data) => {
+        irrigationKnowledgeBase = data;
     });
 
     socket.on('plant_data', (plants) => {
-        plantSliders.innerHTML = ''; // Clear existing sliders
+        plantControlsDiv.innerHTML = ''; // Clear existing controls
         for (const plantId in plants) {
             const plant = plants[plantId];
-            const sliderContainer = document.createElement('div');
-            sliderContainer.classList.add('plant-slider');
-            sliderContainer.innerHTML = `
-                <label for="${plantId}-slider">${plant.name}</label>
-                <input type="range" id="${plantId}-slider" min="0" value="0">
-                <span id="${plantId}-value">0</span>
+            const controlContainer = document.createElement('div');
+            controlContainer.classList.add('plant-control');
+            controlContainer.innerHTML = `
+                <label>${plant.name}</label>
+                <div class="priority-slider">
+                    <span>Priority:</span>
+                    <input type="range" id="${plantId}-priority" min="0" max="10" value="5">
+                </div>
+                <div class="quantity-input">
+                    <span>Quantity:</span>
+                    <input type="number" id="${plantId}-quantity" min="0" value="0" disabled>
+                </div>
+                <button id="${plantId}-lock" class="lock-btn">Lock</button>
             `;
-            plantSliders.appendChild(sliderContainer);
+            plantControlsDiv.appendChild(controlContainer);
         }
     });
 
-    socket.on('update_max_plants', (maxPlants) => {
-        for (const plantId in maxPlants) {
-            const slider = document.getElementById(`${plantId}-slider`);
-            if (slider) {
-                if (slider.max != maxPlants[plantId].max) {
-                    slider.max = maxPlants[plantId].max;
-                }
+    socket.on('update_plant_quantities', (quantities) => {
+        for (const plantId in quantities) {
+            const quantityInput = document.getElementById(`${plantId}-quantity`);
+            if (quantityInput) {
+                quantityInput.value = quantities[plantId];
             }
         }
     });
 
+    socket.on('update_layout', (data) => {
+        while(plantGroup.children.length > 0){
+            plantGroup.remove(plantGroup.children[0]);
+        }
+
+        const placeholderTexture = textureLoader.load('/assets/placeholder.svg');
+        const material = new THREE.MeshBasicMaterial({ map: placeholderTexture });
+
+        data.positions.forEach(pos => {
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const plane = new THREE.Mesh(geometry, material);
+            plane.position.set(pos.x, 0, pos.y);
+            plane.rotation.x = -Math.PI / 2; // Orient the plane to be horizontal
+            plantGroup.add(plane);
+        });
+    });
+
     socket.on('irrigation_results', (data) => {
-        irrigationZones = data.zones;
-        updateResults();
+        const { recommended_system, explanation } = data;
+        irrigationInfoDiv.innerHTML = `
+            <h3>Recommended System: ${explanation.name}</h3>
+            <p>${explanation.description}</p>
+            <p><strong>Water Efficiency:</strong> ${explanation.water_efficiency * 100}%</p>
+        `;
     });
 
-    socket.on('pump_flow_results', (data) => {
-        pumpFlowRate = data.flow_rate;
-        updateResults();
-    });
-
-    socket.on('pipe_length_results', (data) => {
-        pipeLength = data.length;
-        updateResults();
-    });
-
-    socket.on('shading_results', (data) => {
-        shadingRecs = data;
-        updateResults();
-    });
-
-    function sendGardenArea() {
-        const area = gardenAreaInput.value;
-        socket.emit('update_garden_area', { area: parseFloat(area) });
-    }
-
-    function sendPlantCounts() {
-        const plantCounts = {};
-        const sliders = plantSliders.querySelectorAll('input[type="range"]');
-        sliders.forEach(slider => {
-            const plantId = slider.id.replace('-slider', '');
-            plantCounts[plantId] = parseInt(slider.value, 10);
+    function sendGardenData() {
+        const plantPriorities = {};
+        const plantLocks = {};
+        const plantControls = plantControlsDiv.querySelectorAll('.plant-control');
+        plantControls.forEach(control => {
+            const plantId = control.querySelector('input[type="range"]').id.replace('-priority', '');
+            plantPriorities[plantId] = parseInt(control.querySelector('input[type="range"]').value, 10);
+            plantLocks[plantId] = control.querySelector('.lock-btn').classList.contains('locked');
         });
-        socket.emit('update_plant_count', {
+
+        socket.emit('update_garden_layout', {
             garden_area: parseFloat(gardenAreaInput.value),
-            plant_counts: plantCounts,
-            irrigation_type: irrigationTypeInput.value
+            plant_priorities: plantPriorities,
+            plant_locks: plantLocks
         });
     }
 
-    function sendIrrigationData() {
-        socket.emit('calculate_irrigation', {
-            area: parseFloat(gardenAreaInput.value),
-            irrigation_type: irrigationTypeInput.value
-        });
-    }
-
-    function sendSunAngleData() {
-        socket.emit('calculate_shading', {
-            sun_angle: parseFloat(sunAngleInput.value)
-        });
-    }
-
-    gardenAreaInput.addEventListener('input', () => {
-        sendGardenArea();
-        sendPlantCounts();
-        sendIrrigationData();
-        sendSunAngleData();
-    });
-
-    irrigationTypeInput.addEventListener('change', () => {
-        sendIrrigationData();
-        sendPlantCounts();
-    });
-
-    sunAngleInput.addEventListener('input', sendSunAngleData);
-
-    plantSliders.addEventListener('input', (event) => {
-        if (event.target.type === 'range') {
-            const plantId = event.target.id.replace('-slider', '');
-            const valueSpan = document.getElementById(`${plantId}-value`);
-            valueSpan.textContent = event.target.value;
-            sendPlantCounts();
+    // --- Event Listeners ---
+    gardenAreaInput.addEventListener('input', sendGardenData);
+    plantControlsDiv.addEventListener('input', sendGardenData);
+    plantControlsDiv.addEventListener('click', (event) => {
+        if (event.target.classList.contains('lock-btn')) {
+            event.target.classList.toggle('locked');
+            sendGardenData();
         }
     });
 });
