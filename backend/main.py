@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from .irrigation_data import IRRIGATION_KNOWLEDGE_BASE
 from .layout_engine import LayoutEngine
 from .irrigation_layout_engine import IrrigationLayoutEngine
+from .companion_data import COMPANION_DATA
 
 # --- Plant Data ---
 PLANTS = {
@@ -42,11 +43,12 @@ async def update_garden_layout(sid, data):
     garden_area = data.get("garden_area", 10)
     plant_priorities = data.get("plant_priorities", {})
     plant_locks = data.get("plant_locks", {})
+    sun_angle = data.get("sun_angle", 180)
+    row_width = data.get("row_width", 5)
 
     plant_quantities = {plant_id: 0 for plant_id in PLANTS}
     remaining_area = garden_area
 
-    # 1. Allocate locked plants first
     for plant_id, is_locked in plant_locks.items():
         if is_locked:
             quantity = 5
@@ -55,7 +57,6 @@ async def update_garden_layout(sid, data):
                 plant_quantities[plant_id] = quantity
                 remaining_area -= area_needed
 
-    # 2. Distribute remaining area based on priority
     total_priority = sum(plant_priorities.values())
     if total_priority > 0:
         for plant_id, priority in plant_priorities.items():
@@ -67,55 +68,21 @@ async def update_garden_layout(sid, data):
 
     await sio.emit('update_plant_quantities', plant_quantities, to=sid)
 
-    # 3. Generate plant layout
     garden_width = int(garden_area ** 0.5 * 10)
     garden_depth = int(garden_area ** 0.5 * 10)
-    layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS)
+    layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS, COMPANION_DATA, sun_angle, row_width)
     layout_engine.generate_layout(plant_quantities)
     plant_positions = layout_engine.get_plant_positions()
+    layout_scores = layout_engine.get_layout_scores()
 
-    # 4. Generate irrigation layout
-    irrigation_engine = IrrigationLayoutEngine(plant_positions, garden_width, garden_depth)
+    irrigation_engine = IrrigationLayoutEngine(plant_positions, PLANTS, IRRIGATION_KNOWLEDGE_BASE, garden_width, garden_depth)
     irrigation_layout = irrigation_engine.generate_layout()
 
     await sio.emit('update_layout', {
         "plant_positions": plant_positions,
-        "irrigation_layout": irrigation_layout
+        "irrigation_layout": irrigation_layout,
+        "layout_scores": layout_scores
     })
-
-
-# ... (other event handlers remain the same for now)
-@sio.on("calculate_irrigation")
-async def calculate_irrigation(sid, data):
-    recommended_system = "drip_emitter"
-    explanation = IRRIGATION_KNOWLEDGE_BASE[recommended_system]
-
-    await sio.emit("irrigation_results", {
-        "recommended_system": recommended_system,
-        "explanation": explanation
-    })
-
-@sio.on("calculate_shading")
-async def calculate_shading(sid, data):
-    sun_angle = data.get("sun_angle", 180)
-
-    if 90 < sun_angle < 270:
-        sunny_side = "South"
-        shady_side = "North"
-    else:
-        sunny_side = "North"
-        shady_side = "South"
-
-    full_sun_plants = [p["name"] for p in PLANTS.values() if p["sun_preference"] == "full_sun"]
-    partial_shade_plants = [p["name"] for p in PLANTS.values() if p["sun_preference"] == "partial_shade"]
-
-    recommendations = {
-        "sunny_side": {"side": sunny_side, "plants": full_sun_plants},
-        "shady_side": {"side": shady_side, "plants": partial_shade_plants}
-    }
-
-    await sio.emit("shading_results", recommendations)
-
 
 # Mount the socket.io app
 app.mount('/socket.io', socket_app)

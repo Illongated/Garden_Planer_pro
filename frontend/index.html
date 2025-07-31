@@ -19,16 +19,13 @@
                     <input type="number" id="garden-area" value="10">
                 </div>
                 <div class="form-group">
-                    <label for="irrigation-type">Irrigation Type:</label>
-                    <select id="irrigation-type">
-                        <option value="drip_emitter">Drip Emitter</option>
-                        <option value="micro_sprayer">Micro-Sprayer</option>
-                        <option value="soaker_hose">Soaker Hose</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="sun-angle">Sun Angle (degrees from North):</label>
                     <input type="number" id="sun-angle" value="180">
+                </div>
+                <div class="form-group">
+                    <label for="row-width">Row Width (cm):</label>
+                    <input type="range" id="row-width" min="30" max="100" value="50">
+                    <span id="row-width-value">50 cm</span>
                 </div>
             </div>
             <div class="plants-section">
@@ -45,6 +42,10 @@
                     <div id="dashboard-summary"></div>
                     <div id="dashboard-warnings"></div>
                 </div>
+            </div>
+            <div class="scorecard-section">
+                <h2>Layout Scorecard</h2>
+                <div id="layout-scorecard"></div>
             </div>
         </div>
     </main>
