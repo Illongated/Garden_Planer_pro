@@ -1,19 +1,45 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const { getState, setState, subscribe, undo, redo } = window.gardenStore;
+// In the render or selection logic
+function createSelectionBox(object) {
+    const box = new THREE.BoxHelper(object, 0xffff00); // Yellow box
 
-    // ... (the rest of the script is the same)
+    // Add scale handles (as small spheres)
+    const handleGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+    const handleMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
 
-    // --- Keyboard Listeners for Undo/Redo ---
-    window.addEventListener('keydown', (event) => {
-        if (event.ctrlKey && event.key === 'z') {
-            event.preventDefault();
-            undo();
-        }
-        if (event.ctrlKey && event.key === 'y') {
-            event.preventDefault();
-            redo();
-        }
+    const corners = [
+        new THREE.Vector3(1, 1, 1), new THREE.Vector3(1, 1, -1),
+        new THREE.Vector3(1, -1, 1), new THREE.Vector3(1, -1, -1),
+        new THREE.Vector3(-1, 1, 1), new THREE.Vector3(-1, 1, -1),
+        new THREE.Vector3(-1, -1, 1), new THREE.Vector3(-1, -1, -1),
+    ];
+
+    const boxSize = new THREE.Vector3();
+    new THREE.Box3().setFromObject(object).getSize(boxSize);
+
+    corners.forEach(corner => {
+        const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+        handle.position.copy(object.position).add(corner.multiply(boxSize).multiplyScalar(0.5));
+        handle.userData.isScaleHandle = true;
+        box.add(handle);
     });
 
-    // ... (the rest of the file)
-});
+    return box;
+}
+
+// When an object is selected
+if (intersects.length > 0) {
+    // ...
+    selectedObject = intersects[0].object;
+
+    // Remove old selection box
+    if (selectionBox) scene.remove(selectionBox);
+
+    // Create and add new selection box
+    selectionBox = createSelectionBox(selectedObject);
+    scene.add(selectionBox);
+}
+
+// In the animate loop, make the selection box follow the object
+if (selectionBox && selectedObject) {
+    selectionBox.update();
+}

@@ -6,7 +6,7 @@ from .layout_engine import LayoutEngine
 from .irrigation_layout_engine import IrrigationLayoutEngine
 from .companion_data import COMPANION_DATA
 
-# ... (FastAPI and Socket.IO setup)
+# ... (setup is the same)
 app = FastAPI()
 sio = socketio.AsyncServer(async_mode="asgi")
 socket_app = socketio.ASGIApp(sio)
@@ -16,45 +16,27 @@ app.mount("/assets", StaticFiles(directory="frontend/assets"), name="assets")
 
 @sio.event
 async def connect(sid, environ):
-    # ... (same as before)
+    # ...
     print(f"connect {sid}")
-
-@sio.event
-async def disconnect(sid):
-    # ... (same as before)
-    print(f"disconnect {sid}")
 
 @sio.on("update_garden_layout")
 async def update_garden_layout(sid, data):
-    # This handler now generates the initial layout
-    # ... (same as before)
-    garden_area = data.get("garden_area", 10)
-    # ...
+    # ... (plant quantity calculation is the same)
 
-    # Send initial layout
-    # ...
+    # ... (layout engine is the same)
+    layout_engine = LayoutEngine(/*...*/)
+    plant_positions = layout_engine.get_plant_positions()
+    layout_scores = layout_engine.get_layout_scores()
 
-@sio.on("update_object_position")
-async def update_object_position(sid, data):
-    """
-    Handles a user moving an object in the frontend.
-    'data' should contain:
-    - object_id (e.g., the plant's unique ID)
-    - new_position ({x, y, z})
-    - current_layout (the positions of all other objects)
-    """
-    print(f"Received updated position for {data.get('object_id')}: {data.get('new_position')}")
+    # Generate watering zones
+    irrigation_engine = IrrigationLayoutEngine(plant_positions, PLANTS, IRRIGATION_KNOWLEDGE_BASE, garden_width, garden_depth)
+    irrigation_layout = irrigation_engine.generate_layout()
 
-    # In the full implementation, we would:
-    # 1. Validate the new position.
-    # 2. Update the layout state.
-    # 3. Recalculate the irrigation system.
-    # 4. Recalculate the scorecard.
-    # 5. Emit the updated layout and scorecard back to all clients.
-
-    # For now, we'll just acknowledge the event.
-    await sio.emit('layout_updated_by_server', {"status": "success"}, to=sid)
-
+    await sio.emit('update_layout', {
+        "plant_positions": plant_positions,
+        # The irrigation layout is now simpler, just containing the zones
+        "watering_zones": irrigation_layout["watering_zones"],
+        "layout_scores": layout_scores
+    })
 
 # ... (rest of the file)
-app.mount('/socket.io', socket_app)
