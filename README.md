@@ -1,6 +1,6 @@
 # Garden Planner
 
-This is a web application for planning your garden, including features like dynamic plant allocation, irrigation zone planning, and more.
+This is an intelligent, interactive web application for planning your garden. It helps you create optimized layouts for plants and irrigation systems.
 
 ## How to Run
 
@@ -27,12 +27,35 @@ This is a web application for planning your garden, including features like dyna
 
 ## How to Use
 
-1.  **Set Garden Area:** Enter the total area of your garden in square meters.
-2.  **Select Irrigation Type:** Choose between drip or sprinkler irrigation.
-3.  **Set Sun Angle:** Enter the angle of the sun at midday (in degrees from North). 180 is South-facing.
-4.  **Adjust Plant Counts:** Use the sliders to select the number of each type of plant you want to grow. The sliders will update automatically to prevent you from over-allocating space.
-5.  **View Results:** The "Results" section will show you recommendations for:
-    -   The number of irrigation zones.
-    -   The required pump flow rate.
-    -   The estimated length of pipe needed.
-    -   Which plants are best suited for the sunny and shady parts of your garden.
+### Basic Configuration
+- **Set Garden Area:** Enter the total area of your garden in square meters.
+- **Set Sun Angle:** Enter the angle of the sun at midday (in degrees from North). 180 is South-facing.
+- **Set Row Width:** Adjust the slider to set the desired width of the paths between your plants.
+
+### Plant Selection
+- Use the **priority sliders** and **lock buttons** to tell the procedural engine which plants are most important to you. The engine will automatically calculate the quantity of each plant that can fit.
+
+### Interactive Editor
+The main garden layout is a fully interactive editor:
+- **Navigate:** Click and drag the background to rotate the view. Use the scroll wheel to zoom.
+- **Select:** Click on any plant, irrigation component, or watering group (the colored boxes) to select it.
+- **Move:** Click and drag a selected item to move it to a new location.
+- **Undo/Redo:** Use `Ctrl+Z` to undo and `Ctrl+Y` to redo any action.
+- **Duplicate:** Hold the `Alt` key and click on a plant to create a copy of it.
+
+### Dashboards
+- **Irrigation Dashboard:** Provides a detailed "shopping list" of all the components needed for your irrigation system, broken down by watering zone.
+- **Layout Scorecard:** Shows you how well your current layout meets key optimization goals like sun exposure and companion planting.
+
+## Technologies Used
+
+### Backend
+- **Python**
+- **FastAPI:** A modern, fast web framework for building APIs.
+- **Uvicorn:** An ASGI server for running FastAPI.
+- **python-socketio:** For real-time, bidirectional communication between the client and server.
+
+### Frontend
+- **HTML5, CSS3, JavaScript**
+- **Three.js:** A 3D graphics library used to render the interactive garden layout.
+- **Zustand:** A small, fast, and scalable state-management solution for the frontend.
