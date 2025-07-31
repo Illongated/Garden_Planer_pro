@@ -1,45 +1,44 @@
-// In the render or selection logic
-function createSelectionBox(object) {
-    const box = new THREE.BoxHelper(object, 0xffff00); // Yellow box
+function onMouseUp(event) {
+    if (isDragging && selectedObject && selectedObject.userData.type === 'plant') {
+        // ... (collision detection)
 
-    // Add scale handles (as small spheres)
-    const handleGeometry = new THREE.SphereGeometry(0.5, 8, 8);
-    const handleMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        if (!collision) {
+            // Check for cross-group movement
+            const { wateringZones } = getState();
+            let newGroupId = null;
 
-    const corners = [
-        new THREE.Vector3(1, 1, 1), new THREE.Vector3(1, 1, -1),
-        new THREE.Vector3(1, -1, 1), new THREE.Vector3(1, -1, -1),
-        new THREE.Vector3(-1, 1, 1), new THREE.Vector3(-1, 1, -1),
-        new THREE.Vector3(-1, -1, 1), new THREE.Vector3(-1, -1, -1),
-    ];
+            for (const zoneId in wateringZones) {
+                const plantsInZone = getState().plants.filter(p => wateringZones[zoneId].includes(p.id));
+                const zoneBox = new THREE.Box3();
+                plantsInZone.forEach(p => {
+                    const plantBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(p.x, p.y, p.z), new THREE.Vector3(2, 2, 2));
+                    zoneBox.union(plantBox);
+                });
 
-    const boxSize = new THREE.Vector3();
-    new THREE.Box3().setFromObject(object).getSize(boxSize);
+                if (zoneBox.containsPoint(selectedObject.position)) {
+                    newGroupId = zoneId;
+                    break;
+                }
+            }
 
-    corners.forEach(corner => {
-        const handle = new THREE.Mesh(handleGeometry, handleMaterial);
-        handle.position.copy(object.position).add(corner.multiply(boxSize).multiplyScalar(0.5));
-        handle.userData.isScaleHandle = true;
-        box.add(handle);
-    });
+            const oldGroupId = Object.keys(wateringZones).find(zoneId => wateringZones[zoneId].includes(selectedObject.userData.id));
 
-    return box;
-}
-
-// When an object is selected
-if (intersects.length > 0) {
-    // ...
-    selectedObject = intersects[0].object;
-
-    // Remove old selection box
-    if (selectionBox) scene.remove(selectionBox);
-
-    // Create and add new selection box
-    selectionBox = createSelectionBox(selectedObject);
-    scene.add(selectionBox);
-}
-
-// In the animate loop, make the selection box follow the object
-if (selectionBox && selectedObject) {
-    selectionBox.update();
+            if (newGroupId && newGroupId !== oldGroupId) {
+                if (confirm(`Move this plant to the group with water needs of ${newGroupId} L/h?`)) {
+                    getState().movePlantToGroup(selectedObject.userData.id, newGroupId);
+                } else {
+                    selectedObject.position.copy(originalPosition); // Snap back if cancelled
+                }
+            } else {
+                // Regular move
+                getState().movePlant(selectedObject.userData.id, {
+                    x: selectedObject.position.x,
+                    y: selectedObject.position.y,
+                    z: selectedObject.position.z
+                });
+            }
+        }
+        // ... (rest of mouse up)
+    }
+    // ... (rest of mouse up)
 }

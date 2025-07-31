@@ -1,42 +1,22 @@
-import socketio
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from .irrigation_data import IRRIGATION_KNOWLEDGE_BASE
-from .layout_engine import LayoutEngine
-from .irrigation_layout_engine import IrrigationLayoutEngine
-from .companion_data import COMPANION_DATA
+// ...
 
-# ... (setup is the same)
-app = FastAPI()
-sio = socketio.AsyncServer(async_mode="asgi")
-socket_app = socketio.ASGIApp(sio)
-app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
-app.mount("/assets", StaticFiles(directory="frontend/assets"), name="assets")
+@sio.on("scale_garden")
+async def scale_garden(sid, data):
+    factor = data.get("factor", 1.0)
+    print(f"Received scale factor: {factor}")
+    # Here, we would take the current layout, apply the scale factor,
+    # and then re-run all the irrigation and scoring calculations.
+    # This is a complex operation that requires a persistent state on the backend.
+    await sio.emit('layout_updated_by_server', {"status": "success"}, to=sid)
 
 
-@sio.event
-async def connect(sid, environ):
-    # ...
-    print(f"connect {sid}")
+@sio.on("move_plant_to_group")
+async def move_plant_to_group(sid, data):
+    plant_id = data.get("plant_id")
+    new_group_id = data.get("new_group_id")
+    print(f"Received request to move {plant_id} to group {new_group_id}")
+    # Similar to scaling, this requires updating the layout state
+    # and re-running all the calculations.
+    await sio.emit('layout_updated_by_server', {"status": "success"}, to=sid)
 
-@sio.on("update_garden_layout")
-async def update_garden_layout(sid, data):
-    # ... (plant quantity calculation is the same)
-
-    # ... (layout engine is the same)
-    layout_engine = LayoutEngine(/*...*/)
-    plant_positions = layout_engine.get_plant_positions()
-    layout_scores = layout_engine.get_layout_scores()
-
-    # Generate watering zones
-    irrigation_engine = IrrigationLayoutEngine(plant_positions, PLANTS, IRRIGATION_KNOWLEDGE_BASE, garden_width, garden_depth)
-    irrigation_layout = irrigation_engine.generate_layout()
-
-    await sio.emit('update_layout', {
-        "plant_positions": plant_positions,
-        # The irrigation layout is now simpler, just containing the zones
-        "watering_zones": irrigation_layout["watering_zones"],
-        "layout_scores": layout_scores
-    })
-
-# ... (rest of the file)
+// ...
