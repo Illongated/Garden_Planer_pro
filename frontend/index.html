@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Garden Planner</h1>
+    </header>
+    <main>
+        <div class="container">
+            <div class="config-section">
+                <h2>Configuration</h2>
+                <div class="form-group">
+                    <label for="garden-area">Garden Area (m²):</label>
+                    <input type="number" id="garden-area" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="irrigation-type">Irrigation Type:</label>
+                    <select id="irrigation-type">
+                        <option value="drip">Drip</option>
+                        <option value="sprinkler">Sprinkler</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sun-angle">Sun Angle (degrees from North):</label>
+                    <input type="number" id="sun-angle" value="180">
+                </div>
+            </div>
+            <div class="plants-section">
+                <h2>Plants</h2>
+                <div id="plant-sliders"></div>
+            </div>
+            <div class="results-section">
+                <h2>Results</h2>
+                <div id="results"></div>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
