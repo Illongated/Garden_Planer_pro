@@ -1,69 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garden Planner</title>
+    <title>Planificateur de Potager Intelligent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Garden Planner</h1>
-    </header>
-    <main>
-        <div class="container">
-            <aside class="sidebar">
-                <div class="config-section">
-                    <h2>Configuration</h2>
-                    <div class="form-group">
-                        <label for="garden-area">Garden Area (m²):</label>
-                        <input type="number" id="garden-area" value="10" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="sun-angle">Sun Angle (°):</label>
-                        <input type="range" id="sun-angle" min="0" max="360" value="180">
-                    </div>
-                    <div class="form-group">
-                        <label for="row-width">Row Width (m):</label>
-                        <input type="number" id="row-width" value="5" min="1">
+    <div class="main-container">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <img src="assets/placeholder.svg" alt="Logo" class="logo">
+                <h1>Potager Planner</h1>
+            </header>
+
+            <section id="garden-config" class="config-section">
+                <h2>1. Votre Espace</h2>
+                <div class="form-group">
+                    <label for="garden-area-input">Superficie (m²)</label>
+                    <input type="number" id="garden-area-input" value="20" min="1" max="1000">
+                </div>
+                 <div class="form-group">
+                    <label for="sun-angle-slider">Orientation du soleil (°)</label>
+                    <div class="slider-group">
+                        <input type="range" id="sun-angle-slider" min="0" max="360" value="180">
+                        <span id="sun-angle-value">180°</span>
                     </div>
                 </div>
+            </section>
 
-                <div class="plants-section">
-                    <h2>Plants</h2>
-                    <div id="plant-sliders"></div>
-                    <div id="plant-locks"></div>
+            <section id="plant-selection" class="config-section">
+                <h2>2. Vos Cultures</h2>
+                <div id="plant-sliders-container">
+                    <!-- Les sliders de plantes seront injectés ici -->
                 </div>
+            </section>
 
-                <div class="weights-section">
-                    <h2>Layout Weights</h2>
-                    <div class="form-group">
-                        <label for="sun-weight">Sun Exposure:</label>
-                        <input type="range" id="sun-weight" min="0" max="1" step="0.1" value="1.0">
-                    </div>
-                    <div class="form-group">
-                        <label for="companion-weight">Companion Planting:</label>
-                        <input type="range" id="companion-weight" min="0" max="1" step="0.1" value="1.0">
-                    </div>
+            <section id="irrigation-config" class="config-section">
+                <h2>3. Irrigation</h2>
+                 <div class="form-group">
+                    <label for="irrigation-type-select">Type d'irrigation</label>
+                    <select id="irrigation-type-select">
+                        <!-- Options injectées par JS -->
+                    </select>
                 </div>
-                <button id="update-layout-btn">Update Layout</button>
-            </aside>
+                <div class="form-group">
+                    <label for="watering-time-input">Temps d'arrosage (min)</label>
+                    <input type="number" id="watering-time-input" value="30" min="5" step="5">
+                </div>
+            </section>
 
-            <div id="canvas-container"></div>
+        </aside>
 
-            <div class="results-section">
-                <h2>Results</h2>
-                <div id="results"></div>
+        <main class="content-area">
+            <div id="canvas-container">
+                 <!-- Le canvas Three.js sera ici -->
             </div>
-        </div>
-    </main>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.development.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.development.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/zustand@3.7.2/umd/vanilla.production.js"></script>
-    <script src="store.js" defer></script>
-    <script src="script.js" defer></script>
+            <div id="results-container" class="results-panel">
+                <div class="results-header">
+                    <h2>Analyse & Recommandations</h2>
+                </div>
+                <div id="results-content">
+                    <!-- Les résultats seront injectés ici -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Librairies JS -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/zustand@3.7.2/umd/vanilla.production.js"></script>
+
+    <!-- Scripts de l'application -->
+    <script src="store.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
