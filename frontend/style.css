@@ -109,3 +109,8 @@ header {
 #results p {
     margin-bottom: 1rem;
 }
+
+#canvas-container {
+    height: 500px;
+    border: 1px solid var(--dark-color);
+}
