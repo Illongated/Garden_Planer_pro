@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Socket Handlers ---
     socket.on('update_layout', (data) => {
-        // ...
+        window.gardenStore.getState().setInitialLayout(data);
     });
 
     // ... (the rest of the file)
