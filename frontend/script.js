@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const raycaster = new THREE.Raycaster();
     // ... (other interaction variables)
 
+    // --- Event Handler for Mouse Down ---
+    function onMouseDown(event) {
+        // Placeholder for future implementation
+    }
+
     // --- RENDER/UPDATE LOOP ---
     function animate() {
         // ...
