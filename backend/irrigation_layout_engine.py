@@ -33,26 +33,32 @@ class IrrigationLayoutEngine:
 
         return dict(zones)
 
-    def _estimate_pipe_length(self, zone_plants):
+    def _calculate_zone_path(self, zone_plants):
         """
-        Estimates pipe length for a zone by calculating a simple path connecting all plants.
-        This is a rough estimation (traveling salesman problem is NP-hard).
+        Calculates a simple path connecting all plants in a zone and its length.
+        Returns the path (list of points) and the total length in meters.
         """
         if not zone_plants:
-            return 0
+            return [], 0
 
-        # Start with a simple heuristic: sort by x then y and sum distances
-        path = sorted(zone_plants, key=lambda p: (p['x'], p['y']))
-        total_distance = 0
-        for i in range(len(path) - 1):
-            p1 = path[i]
-            p2 = path[i+1]
-            # Euclidean distance in decimeters
+        # Start with a simple heuristic: sort by x then y to create a path
+        path_points = sorted(zone_plants, key=lambda p: (p['x'], p['y']))
+
+        # The actual path for drawing is the center of each plant
+        path_coords = []
+        for p in path_points:
+            center_x = p['x'] + p['width'] / 2
+            center_y = p['y'] + p['height'] / 2
+            path_coords.append({'x': center_x, 'y': center_y})
+
+        total_distance_dm = 0
+        for i in range(len(path_coords) - 1):
+            p1 = path_coords[i]
+            p2 = path_coords[i+1]
             distance = math.sqrt((p1['x'] - p2['x'])**2 + (p1['y'] - p2['y'])**2)
-            total_distance += distance
+            total_distance_dm += distance
 
-        # Convert from decimeters to meters
-        return total_distance / 10.0
+        return path_coords, total_distance_dm / 10.0
 
     def _recommend_pump(self, required_flow_lph):
         """Recommends a standard pump size."""
@@ -75,13 +81,14 @@ class IrrigationLayoutEngine:
             if not plants_in_zone: continue
 
             zone_water_lph = sum(self.plants_data[p['plant_id']]['water_L_per_hour'] for p in plants_in_zone)
-            pipe_length_m = self._estimate_pipe_length(plants_in_zone)
+            path_coords, pipe_length_m = self._calculate_zone_path(plants_in_zone)
 
             detailed_zones[zone_name] = {
                 "num_plants": len(plants_in_zone),
                 "water_needs_lph": round(zone_water_lph, 2),
                 "estimated_pipe_m": round(pipe_length_m, 2),
-                "plant_ids": list(set(p['plant_id'] for p in plants_in_zone))
+                "plant_ids": list(set(p['plant_id'] for p in plants_in_zone)),
+                "path": path_coords # Add the path for frontend rendering
             }
             total_system_water_lph += zone_water_lph
             total_pipe_length_m += pipe_length_m

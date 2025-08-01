@@ -2,16 +2,34 @@ import math
 import random
 
 class LayoutEngine:
-    def __init__(self, garden_width, garden_depth, plants_data, companion_data, sun_angle=180):
+    def __init__(self, garden_width, garden_depth, plants_data, companion_data, sun_angle=180, placed_plants=[]):
         self.garden_width = garden_width
         self.garden_depth = garden_depth
         self.plants_data = plants_data
         self.companion_data = companion_data
         self.sun_angle = sun_angle
+        self.placed_plants = placed_plants
 
         self.grid = [[None for _ in range(garden_width)] for _ in range(garden_depth)]
         self.scores = {"sun": [], "companion": []}
         self.sun_map = self._calculate_sun_map()
+        self.placed_plant_ids = {p['instance_id'] for p in self.placed_plants}
+
+    def _pin_placed_plants(self):
+        """Marks the grid with the positions of manually placed plants."""
+        for plant in self.placed_plants:
+            plant_id = plant['plant_id']
+            plant_data = self.plants_data[plant_id]
+            plant_size_m = math.sqrt(plant_data['space_m2'])
+            plant_size_units = int(plant_size_m * 10)
+
+            x, y = int(plant['x']), int(plant['y'])
+
+            for i in range(y, y + plant_size_units):
+                for j in range(x, x + plant_size_units):
+                    if 0 <= i < self.garden_depth and 0 <= j < self.garden_width:
+                        # Use a special identifier for manually placed plants
+                        self.grid[i][j] = f"manual_{plant['instance_id']}"
 
     def _calculate_sun_map(self):
         sun_map = [[0.0 for _ in range(self.garden_width)] for _ in range(self.garden_depth)]
@@ -105,9 +123,18 @@ class LayoutEngine:
         return best_pos_info
 
     def generate_layout(self, plant_quantities):
+        self._pin_placed_plants()
+
+        # Calculate quantities of plants to be placed procedurally
+        procedural_quantities = plant_quantities.copy()
+        for p in self.placed_plants:
+            if p['plant_id'] in procedural_quantities:
+                procedural_quantities[p['plant_id']] -= 1
+
         plant_list = []
-        for plant_id, quantity in plant_quantities.items():
-            plant_list.extend([plant_id] * quantity)
+        for plant_id, quantity in procedural_quantities.items():
+            if quantity > 0:
+                plant_list.extend([plant_id] * quantity)
 
         # Sort plants: sun-lovers and larger plants first
         plant_list.sort(key=lambda pid: (
@@ -140,29 +167,22 @@ class LayoutEngine:
     def get_plant_positions(self):
         positions = []
         # Keep track of the top-left corner of plants already added
-        placed_plants = set()
+        procedurally_placed = set()
 
+        # 1. Get procedurally placed plants from the grid
         for y in range(self.garden_depth):
             for x in range(self.garden_width):
-                plant_id = self.grid[y][x]
-                if plant_id:
-                    # Find the top-left corner of this plant block
+                cell_content = self.grid[y][x]
+                if cell_content and not str(cell_content).startswith("manual_"):
+                    plant_id = cell_content
+                    # Find the top-left corner of this plant block to avoid duplicates
                     origin_x, origin_y = x, y
                     while origin_x > 0 and self.grid[y][origin_x - 1] == plant_id:
                         origin_x -= 1
-                    while origin_y > 0 and self.grid[origin_y - 1][x] == plant_id:
-                         # Need to check the whole row for this to be correct
-                        is_part_of_same_block = True
-                        for k in range(origin_x, x + 1):
-                           if self.grid[origin_y - 1][k] != plant_id:
-                               is_part_of_same_block = False
-                               break
-                        if is_part_of_same_block:
-                            origin_y -= 1
-                        else:
-                            break
+                    while origin_y > 0 and all(self.grid[origin_y - 1][k] == plant_id for k in range(origin_x, x + 1)):
+                        origin_y -= 1
 
-                    if (origin_x, origin_y) not in placed_plants:
+                    if (origin_x, origin_y) not in procedurally_placed:
                         plant = self.plants_data[plant_id]
                         plant_size_m = math.sqrt(plant['space_m2'])
                         plant_size_units = int(plant_size_m * 10)
@@ -171,7 +191,24 @@ class LayoutEngine:
                             "plant_id": plant_id,
                             "x": origin_x, "y": origin_y,
                             "width": plant_size_units,
-                            "height": plant_size_units
+                            "height": plant_size_units,
+                            "is_manual": False
                         })
-                        placed_plants.add((origin_x, origin_y))
+                        procedurally_placed.add((origin_x, origin_y))
+
+        # 2. Add the manually placed plants
+        for plant in self.placed_plants:
+            plant_data = self.plants_data[plant['plant_id']]
+            plant_size_m = math.sqrt(plant_data['space_m2'])
+            plant_size_units = int(plant_size_m * 10)
+            positions.append({
+                "plant_id": plant['plant_id'],
+                "x": int(plant['x']),
+                "y": int(plant['y']),
+                "width": plant_size_units,
+                "height": plant_size_units,
+                "is_manual": True,
+                "instance_id": plant['instance_id']
+            })
+
         return positions
