@@ -1,24 +1,35 @@
-// ... (createVanillaStoreWithUndo is the same)
+const { createStore } = window.zustand;
+
+// A custom implementation of a store with undo/redo capabilities.
+const createVanillaStoreWithUndo = (initialState, actions) => {
+    // ... (implementation)
+};
+
 
 const gardenStore = createVanillaStoreWithUndo(
     { // Initial State
-        // ...
+        plants: [],
+        wateringZones: {},
+        layoutScores: {},
     },
     (set) => ({ // Actions
-        // ... (other actions)
+        setInitialLayout: (layout) => set({
+            // ...
+        }),
+        movePlant: (plantId, newPosition) => set((state) => ({
+            // ...
+        })),
+        moveGroup: (groupId, delta) => set((state) => {
+            // ...
+        }),
+        duplicatePlant: (plantId, newPosition) => set((state) => {
+            // ...
+        }),
+        scaleGarden: (factor) => set((state) => ({
+            // ...
+        })),
         movePlantToGroup: (plantId, newGroupId) => set((state) => {
-            const newWateringZones = { ...state.wateringZones };
-            // Remove plant from old zone
-            for (const zoneId in newWateringZones) {
-                newWateringZones[zoneId] = newWateringZones[zoneId].filter(id => id !== plantId);
-            }
-            // Add plant to new zone
-            if (!newWateringZones[newGroupId]) {
-                newWateringZones[newGroupId] = [];
-            }
-            newWateringZones[newGroupId].push(plantId);
-
-            return { wateringZones: newWateringZones };
+            // ...
         }),
     })
 );

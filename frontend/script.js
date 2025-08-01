@@ -1,44 +1,31 @@
-function onMouseUp(event) {
-    if (isDragging && selectedObject && selectedObject.userData.type === 'plant') {
-        // ... (collision detection)
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Socket.IO Setup ---
+    const socket = io();
+    const plantControlsDiv = document.getElementById('plant-controls');
+    // ... (getting other elements)
 
-        if (!collision) {
-            // Check for cross-group movement
-            const { wateringZones } = getState();
-            let newGroupId = null;
+    // --- Three.js Setup ---
+    const container = document.getElementById('canvas-container');
+    // ... (scene, camera, renderer setup)
 
-            for (const zoneId in wateringZones) {
-                const plantsInZone = getState().plants.filter(p => wateringZones[zoneId].includes(p.id));
-                const zoneBox = new THREE.Box3();
-                plantsInZone.forEach(p => {
-                    const plantBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(p.x, p.y, p.z), new THREE.Vector3(2, 2, 2));
-                    zoneBox.union(plantBox);
-                });
+    // --- Interaction Variables ---
+    const raycaster = new THREE.Raycaster();
+    // ... (other interaction variables)
 
-                if (zoneBox.containsPoint(selectedObject.position)) {
-                    newGroupId = zoneId;
-                    break;
-                }
-            }
-
-            const oldGroupId = Object.keys(wateringZones).find(zoneId => wateringZones[zoneId].includes(selectedObject.userData.id));
-
-            if (newGroupId && newGroupId !== oldGroupId) {
-                if (confirm(`Move this plant to the group with water needs of ${newGroupId} L/h?`)) {
-                    getState().movePlantToGroup(selectedObject.userData.id, newGroupId);
-                } else {
-                    selectedObject.position.copy(originalPosition); // Snap back if cancelled
-                }
-            } else {
-                // Regular move
-                getState().movePlant(selectedObject.userData.id, {
-                    x: selectedObject.position.x,
-                    y: selectedObject.position.y,
-                    z: selectedObject.position.z
-                });
-            }
-        }
-        // ... (rest of mouse up)
+    // --- RENDER/UPDATE LOOP ---
+    function animate() {
+        // ...
     }
-    // ... (rest of mouse up)
-}
+    animate();
+
+    // --- Event Listeners for Interaction ---
+    container.addEventListener('mousedown', onMouseDown, false);
+    // ... (other event listeners)
+
+    // --- Socket Handlers ---
+    socket.on('update_layout', (data) => {
+        // ...
+    });
+
+    // ... (the rest of the file)
+});

@@ -39,6 +39,7 @@ app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
 @sio.event
 async def connect(sid, environ):
     print(f"connect {sid}")
+    # Send initial data to the client
     await sio.emit('plant_data', PLANTS, to=sid)
     await sio.emit('irrigation_knowledge_base', IRRIGATION_KNOWLEDGE_BASE, to=sid)
 
@@ -50,17 +51,19 @@ async def disconnect(sid):
 
 @sio.on("update_garden_layout")
 async def update_garden_layout(sid, data):
+    # This is the main event handler that triggers all the procedural engines.
     garden_area = data.get("garden_area", 10)
     plant_priorities = data.get("plant_priorities", {})
     plant_locks = data.get("plant_locks", {})
     sun_angle = data.get("sun_angle", 180)
     row_width = data.get("row_width", 5)
 
+    # 1. Calculate plant quantities based on priorities
     plant_quantities = {plant_id: 0 for plant_id in PLANTS}
     remaining_area = garden_area
-
     for plant_id, is_locked in plant_locks.items():
         if is_locked:
+            # A simple approach for locked plants
             quantity = 5
             area_needed = quantity * PLANTS[plant_id]["space_m2"]
             if remaining_area >= area_needed:
@@ -78,6 +81,7 @@ async def update_garden_layout(sid, data):
 
     await sio.emit('update_plant_quantities', plant_quantities, to=sid)
 
+    # 2. Generate the intelligent plant layout
     garden_width = int(garden_area ** 0.5 * 10)
     garden_depth = int(garden_area ** 0.5 * 10)
     layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS, COMPANION_DATA, sun_angle, row_width)
@@ -85,9 +89,11 @@ async def update_garden_layout(sid, data):
     plant_positions = layout_engine.get_plant_positions()
     layout_scores = layout_engine.get_layout_scores()
 
+    # 3. Generate the intelligent irrigation layout based on the plant layout
     irrigation_engine = IrrigationLayoutEngine(plant_positions, PLANTS, IRRIGATION_KNOWLEDGE_BASE, garden_width, garden_depth)
     irrigation_layout = irrigation_engine.generate_layout()
 
+    # 4. Send the complete, updated layout to the frontend
     await sio.emit('update_layout', {
         "plant_positions": plant_positions,
         "irrigation_layout": irrigation_layout,
