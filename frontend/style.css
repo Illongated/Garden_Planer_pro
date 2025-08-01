@@ -246,3 +246,52 @@ input[type="range"]::-moz-range-thumb {
     font-weight: 700;
     color: var(--primary-green);
 }
+
+/* --- Plant Palette --- */
+#palette-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    min-height: 60px;
+    border: 1px dashed var(--border-color);
+}
+
+.palette-placeholder {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: center;
+    width: 100%;
+    align-self: center;
+}
+
+.palette-plant {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: grab;
+    user-select: none; /* Prevent text selection while dragging */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+.palette-plant:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.palette-plant.dragging {
+    cursor: grabbing;
+    opacity: 0.5;
+    transform: scale(1.2);
+    z-index: 1000;
+    position: absolute; /* Take out of flow */
+}

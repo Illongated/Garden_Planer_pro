@@ -59,6 +59,7 @@ async def update_garden_layout(sid, data):
     # 1. Get data from frontend
     garden_area = data.get("garden_area", 10)
     plant_quantities = data.get("plant_quantities", {})
+    placed_plants = data.get("placed_plants", []) # New: get manually placed plants
     sun_angle = data.get("sun_angle", 180)
     irrigation_type = data.get("irrigation_type", "drip_emitter")
     watering_time_min = data.get("watering_time", 30)
@@ -73,7 +74,8 @@ async def update_garden_layout(sid, data):
         garden_depth_dm,
         PLANTS,
         COMPANION_DATA,
-        sun_angle
+        sun_angle,
+        placed_plants # Pass manually placed plants to the engine
     )
     layout_engine.generate_layout(plant_quantities)
     plant_positions = layout_engine.get_plant_positions()
