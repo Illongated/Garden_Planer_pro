@@ -487,27 +487,29 @@ class GardenPlanner {
         this.scene.add(this.ground);
 
         // --- Plant Meshes ---
-        // This part now only renders plants from the procedural generator
-        // Manually placed plants are handled separately to avoid duplication
-        this.plantMeshes.children.forEach(child => {
+        // Clear only procedurally-placed plants before re-drawing them
+        // Iterate backwards to safely remove items from the collection
+        for (let i = this.plantMeshes.children.length - 1; i >= 0; i--) {
+            const child = this.plantMeshes.children[i];
             if (child.userData.isProcedural) {
                 this.plantMeshes.remove(child);
             }
-        });
+        }
 
         plant_positions.forEach(pos => {
-            const plantData = this.plants[pos.plant_id];
-            const size = Math.sqrt(plantData.space_m2);
-            const geometry = new THREE.BoxGeometry(size, size * 1.5, size);
-            const material = new THREE.MeshStandardMaterial({ color: this.plantColors[pos.plant_id] });
+            // Only draw the plants that are NOT manually placed by the user
+            if (!pos.is_manual) {
+                const plantData = this.plants[pos.plant_id];
+                const size = Math.sqrt(plantData.space_m2);
+                const geometry = new THREE.BoxGeometry(size, size * 1.5, size);
+                const material = new THREE.MeshStandardMaterial({ color: this.plantColors[pos.plant_id] });
 
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(
-                (pos.x / 10) + size / 2 - gardenDim / 2,
-                (size * 1.5) / 2,
-                (pos.y / 10) + size / 2 - gardenDim / 2
-            );
-            this.plantMeshes.add(cube);
+                const cube = new THREE.Mesh(geometry, material);
+                cube.userData.isProcedural = true; // Flag for future clearing
+
+                this.updateMeshPosition(cube, pos.x, pos.y);
+                this.plantMeshes.add(cube);
+            }
         });
 
         // Adjust camera zoom to fit the garden, instead of moving the camera
