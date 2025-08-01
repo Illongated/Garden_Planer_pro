@@ -57,6 +57,7 @@ async def update_garden_layout(sid, data):
     plant_locks = data.get("plant_locks", {})
     sun_angle = data.get("sun_angle", 180)
     row_width = data.get("row_width", 5)
+    layout_weights = data.get("layout_weights", {"sun": 1.0, "companion": 1.0})
 
     # 1. Calculate plant quantities based on priorities
     plant_quantities = {plant_id: 0 for plant_id in PLANTS}
@@ -84,7 +85,7 @@ async def update_garden_layout(sid, data):
     # 2. Generate the intelligent plant layout
     garden_width = int(garden_area ** 0.5 * 10)
     garden_depth = int(garden_area ** 0.5 * 10)
-    layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS, COMPANION_DATA, sun_angle, row_width)
+    layout_engine = LayoutEngine(garden_width, garden_depth, PLANTS, COMPANION_DATA, sun_angle, row_width, weights=layout_weights)
     layout_engine.generate_layout(plant_quantities)
     plant_positions = layout_engine.get_plant_positions()
     layout_scores = layout_engine.get_layout_scores()
