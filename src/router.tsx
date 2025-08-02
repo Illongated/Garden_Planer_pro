@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import Gardens from './pages/Gardens'
 import Settings from './pages/Settings'
 import NotFound from './pages/NotFound'
+import GardenEditorPage from './features/garden-editor/pages/GardenEditorPage'
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <Dashboard /> },
           { path: 'gardens', element: <Gardens /> },
+          { path: 'gardens/:gardenId', element: <GardenEditorPage /> },
           { path: 'settings', element: <Settings /> },
         ],
       },

@@ -11,23 +11,28 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
+    "@pixi/react": "^7.1.2",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@tanstack/react-query": "^5.32.0",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.378.0",
+    "pixi.js": "^7.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.4",
     "react-router-dom": "^6.23.0",
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "zustand": "^4.5.2",
-    "axios": "^1.6.8",
-    "react-hook-form": "^7.51.4",
-    "@hookform/resolvers": "^3.3.4",
-    "zod": "^3.23.6"
+    "uuid": "^11.1.0",
+    "victor": "^1.1.0",
+    "zod": "^3.23.6",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
