@@ -10,6 +10,7 @@ import GuestGuard from './features/auth/components/GuestGuard'
 import Dashboard from './pages/Dashboard'
 import Gardens from './pages/Gardens'
 import Settings from './pages/Settings'
+import GardenPlanner from './pages/GardenPlanner'
 import NotFound from './pages/NotFound'
 
 export const router = createBrowserRouter([
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/', element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <Dashboard /> },
+          { path: 'planner', element: <GardenPlanner /> },
           { path: 'gardens', element: <Gardens /> },
           { path: 'settings', element: <Settings /> },
         ],

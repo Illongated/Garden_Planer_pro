@@ -60,6 +60,32 @@ async def seed_data(db: AsyncSession) -> None:
     await crud_plant.create(db, obj_in=plant3_in)
     logger.info(f"Created plant: {plant3_in.name}")
 
+    # Seed Plant Catalog
+    logger.info("Creating plant catalog...")
+    from app.crud import plant_catalog as crud_plant_catalog
+    from app.schemas import PlantCatalogCreate
+
+    plant_catalog_data = [
+        { "id": 1, "name": "Tomato", "variety": "Roma", "plant_type": "Vegetable", "image": "https://i.ibb.co/bFqgLqj/tomato.jpg", "description": "A popular and versatile vegetable, great for sauces and salads.", "sun": "Full Sun", "water": "Regular", "spacing": "18-24 inches", "planting_season": ["Spring", "Summer"], "harvest_season": ["Summer", "Fall"], "compatibility": ["Basil", "Carrot"], "tips": "Provide support with stakes or cages. Water consistently to prevent blossom-end rot." },
+        { "id": 2, "name": "Basil", "variety": "Genovese", "plant_type": "Herb", "image": "https://i.ibb.co/mSgM1SP/basil.jpg", "description": "A fragrant herb that is a staple in Italian cuisine.", "sun": "Full Sun", "water": "Regular", "spacing": "10-12 inches", "planting_season": ["Spring", "Summer"], "harvest_season": ["Summer", "Fall"], "compatibility": ["Tomato", "Pepper"], "tips": "Pinch off flower buds to encourage leaf growth. Harvest leaves from the top to promote a bushier plant." },
+        { "id": 3, "name": "Carrot", "variety": "Danvers", "plant_type": "Vegetable", "image": "https://i.ibb.co/hRk5T1N/carrot.jpg", "description": "A sweet root vegetable that is rich in Vitamin A.", "sun": "Full Sun", "water": "Regular", "spacing": "2-3 inches", "planting_season": ["Spring", "Fall"], "harvest_season": ["Summer", "Fall"], "compatibility": ["Lettuce", "Radish", "Tomato"], "tips": "Ensure soil is loose and free of rocks for straight root growth. Keep soil moist to prevent splitting." },
+        { "id": 4, "name": "Marigold", "variety": "French", "plant_type": "Flower", "image": "https://i.ibb.co/qNq3sKk/marigold.jpg", "description": "A cheerful flower that helps deter pests in the garden.", "sun": "Full Sun", "water": "Moderate", "spacing": "8-10 inches", "planting_season": ["Spring", "Summer"], "harvest_season": [], "compatibility": ["Most vegetables"], "tips": "Deadhead spent blooms to encourage continuous flowering. Tolerant of poor soil and heat." },
+        { "id": 5, "name": "Lettuce", "variety": "Romaine", "plant_type": "Vegetable", "image": "https://i.ibb.co/2Zp6fVn/lettuce.jpg", "description": "A crisp, leafy green perfect for salads and sandwiches.", "sun": "Partial Shade", "water": "Regular", "spacing": "8-12 inches", "planting_season": ["Spring", "Fall"], "harvest_season": ["Spring", "Fall"], "compatibility": ["Carrot", "Cucumber", "Strawberry"], "tips": "Prefers cooler weather. Provide afternoon shade in warmer climates to prevent bolting." },
+        { "id": 6, "name": "Cucumber", "variety": "Marketmore", "plant_type": "Vegetable", "image": "https://i.ibb.co/Y06j2p1/cucumber.jpg", "description": "A refreshing vegetable for salads, pickling, or eating fresh.", "sun": "Full Sun", "water": "Plentiful", "spacing": "12-18 inches", "planting_season": ["Spring", "Summer"], "harvest_season": ["Summer"], "compatibility": ["Beans", "Corn", "Peas"], "tips": "Grow on a trellis to save space and keep fruit clean. Water deeply and consistently." },
+        { "id": 7, "name": "Rosemary", "variety": "Arp", "plant_type": "Herb", "image": "https://i.ibb.co/K2gS3P1/rosemary.jpg", "description": "A woody, perennial herb with fragrant, needle-like leaves.", "sun": "Full Sun", "water": "Drought-tolerant", "spacing": "2-3 feet", "planting_season": ["Spring"], "harvest_season": ["Year-round"], "compatibility": ["Cabbage", "Sage"], "tips": "Requires well-drained soil. Can be grown in containers. Prune after flowering to maintain shape." },
+        { "id": 8, "name": "Zinnia", "variety": "California Giant", "plant_type": "Flower", "image": "https://i.ibb.co/yQdCg8N/zinnia.jpg", "description": "A vibrant, easy-to-grow flower that attracts pollinators.", "sun": "Full Sun", "water": "Moderate", "spacing": "10-12 inches", "planting_season": ["Spring", "Summer"], "harvest_season": [], "compatibility": ["All plants"], "tips": "Deadhead regularly to promote more blooms. Good air circulation helps prevent powdery mildew." }
+    ]
+
+    for plant_data in plant_catalog_data:
+        plant = await crud_plant_catalog.get(db, id=plant_data["id"])
+        if not plant:
+            plant_in = PlantCatalogCreate(**plant_data)
+            await crud_plant_catalog.create(db, obj_in=plant_in)
+            logger.info(f"Created catalog plant: {plant_in.name}")
+        else:
+            logger.info(f"Catalog plant already exists: {plant.name}")
+
+
     logger.info("Database seeding completed successfully.")
 
 async def main() -> None:

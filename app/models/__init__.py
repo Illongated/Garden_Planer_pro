@@ -5,3 +5,4 @@ from .base import Base
 from .user import User
 from .garden import Garden
 from .plant import Plant
+from .plant_catalog import PlantCatalog
