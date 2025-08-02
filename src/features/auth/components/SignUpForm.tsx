@@ -1,43 +1,65 @@
-import { useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import LoadingSpinner from '@/components/loading-spinner'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '../hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import LoadingSpinner from '@/components/loading-spinner';
+import { toast } from 'sonner';
+import { signUpSchema, SignUpSchema } from '../schemas';
 
 export const SignUpForm = () => {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const { signup } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { signup } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpSchema>({
+    resolver: zodResolver(signUpSchema),
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  const onSubmit = async (data: SignUpSchema) => {
+    setIsLoading(true);
     try {
-      await signup({ name, email, password })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign up failed')
+      await signup({
+        email: data.email,
+        password: data.password,
+        full_name: data.fullName,
+       });
+      setIsSubmitted(true);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'An unknown error occurred during sign up.';
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="text-center">
+        <h3 className="text-lg font-semibold">Registration Successful!</h3>
+        <p className="text-muted-foreground mt-2">
+          Please check your email inbox for a verification link to activate your account.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="fullName">Full Name</Label>
         <Input
-          id="name"
+          id="fullName"
           type="text"
           placeholder="John Doe"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          {...register('fullName')}
         />
+        {errors.fullName && <p className="text-sm text-destructive">{errors.fullName.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -45,26 +67,23 @@ export const SignUpForm = () => {
           id="email"
           type="email"
           placeholder="m@example.com"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          {...register('email')}
         />
+        {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register('password')}
         />
+        {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading && <LoadingSpinner className="mr-2 h-4 w-4" />}
-        Sign Up
+        Create Account
       </Button>
     </form>
-  )
-}
+  );
+};

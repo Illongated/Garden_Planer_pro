@@ -1,31 +1,18 @@
 import redis.asyncio as redis
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from fastapi_csrf_protect import CsrfProtect
+from fastapi_csrf_protect.exceptions import CsrfProtectError
 
 from app.core.config import settings
+from app.core.limiter import limiter
 from app.api.v1.api import api_router
-
-# Initialize Rate Limiter
-limiter = Limiter(key_func=get_remote_address, default_limits=["1000 per minute"])
-
-# Initialize FastAPI App
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    version="1.0.0",
-    description="A modern, production-ready RESTful API for the Agrotique Garden Planner.",
-)
-
-# Add Rate Limiter state and handlers
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-from contextlib import asynccontextmanager
 
 # --- Lifespan Manager for Redis Connection ---
 @asynccontextmanager
@@ -43,7 +30,7 @@ async def lifespan(app: FastAPI):
     yield
     await app.state.redis.aclose()
 
-# Initialize FastAPI App
+# --- App Initialization ---
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
@@ -53,31 +40,32 @@ app = FastAPI(
 )
 
 # --- Middleware ---
-# In a production environment, you should restrict origins to your frontend's domain.
+app.state.limiter = limiter
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=[settings.CLIENT_URL],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# --- Custom Exception Handler for Pydantic Validation Errors ---
+# --- CSRF Protection ---
+@CsrfProtect.load_config
+def get_csrf_config():
+    return [("secret_key", settings.CSRF_SECRET), ("cookie_samesite", "strict")]
+
+@app.exception_handler(CsrfProtectError)
+def csrf_protect_exception_handler(request: Request, exc: CsrfProtectError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
+# --- Exception Handlers ---
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """
-    A custom exception handler to provide more detailed validation error messages.
-    """
-    # You can customize the error response format here
-    errors = []
-    for error in exc.errors():
-        errors.append({
-            "loc": " -> ".join(map(str, error["loc"])),
-            "msg": error["msg"],
-            "type": error["type"],
-        })
+    errors = [{"loc": " -> ".join(map(str, e["loc"])), "msg": e["msg"]} for e in exc.errors()]
     return JSONResponse(
-        status_code=422,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": "Validation Error", "errors": errors},
     )
 
@@ -87,7 +75,4 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # --- Root Endpoint ---
 @app.get("/", tags=["Root"])
 async def read_root():
-    """
-    A simple root endpoint to confirm the API is running.
-    """
     return {"message": f"Welcome to the {settings.PROJECT_NAME}"}
