@@ -1,127 +1,84 @@
-# Agrotique Garden Planner API
+# Agrotique Garden Planner
 
-A modern, production-ready RESTful API for the Agrotique Garden Planner, built with FastAPI, PostgreSQL, and SQLAlchemy 2.0. This project is fully containerized with Docker and includes a suite of tools for database management.
+This project is a complete, production-ready plant catalog system for the Agrotique Garden Planner. It features a modern, full-stack architecture with a FastAPI backend and a React frontend, containerized with Docker for easy setup and deployment.
 
-## ✨ Features
+## Features
 
-- **Modern Tech Stack**: FastAPI for high-performance APIs, Pydantic for data validation.
-- **Async Everywhere**: Fully asynchronous from the API layer down to the database.
-- **SQLAlchemy 2.0 ORM**: Modern, fully-typed data models.
-- **PostgreSQL Database**: A robust, open-source relational database.
-- **Alembic Migrations**: For clear, version-controlled database schema changes.
-- **Dockerized Environment**: `docker-compose.yml` for easy local development and deployment.
-- **Production-Ready**: Connection pooling, environment-based configuration, and structured logging.
-- **Database Utilities**: Scripts for seeding, backing up, restoring, and monitoring the database.
-- **Secure by Default**: JWT-based authentication, password hashing, and CSRF protection.
+- **Complete Plant Database**: A comprehensive catalog of vegetables, herbs, and flowers with agronomic metadata.
+- **Advanced Search & Filtering**: A full-text search API with filters for plant type, planting season, and sun requirements.
+- **Drag & Drop UI**: A React-based palette component allows users to drag plants onto a garden canvas.
+- **User Favorites**: Client-side persistence of favorite plants using Zustand and localStorage.
+- **Responsive Views**: Switch between grid and list views for the plant catalog.
+- **High Performance**: Utilizes React Query for intelligent caching and a debounced search for a smooth user experience.
+- **Fully Typed**: Strict TypeScript on the frontend and Pydantic models on the backend for robust, type-safe code.
 
-## 🚀 Getting Started
+## Tech Stack
+
+- **Backend**: FastAPI, Pydantic, Uvicorn
+- **Frontend**: React, TypeScript, Vite, React Query, Zustand, dnd-kit, Axios
+- **Orchestration**: Docker, Docker Compose
+
+## Project Structure
+
+```
+.
+├── backend/
+│   ├── app/                # FastAPI application source
+│   ├── data/               # Plant data in JSON format
+│   ├── Dockerfile          # Dockerfile for the backend
+│   └── requirements.txt    # Python dependencies
+├── frontend/
+│   ├── public/             # Public assets
+│   ├── src/                # React application source
+│   ├── Dockerfile          # Dockerfile for the frontend
+│   └── package.json        # Node.js dependencies
+├── docker-compose.yml      # Orchestrates the frontend and backend services
+└── README.md               # This file
+```
+
+## Getting Started
 
 ### Prerequisites
 
-- [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed on your machine.
-- A shell environment (like Bash or Zsh).
+- [Docker](https://www.docker.com/get-started) installed on your machine.
+- [Docker Compose](https://docs.docker.com/compose/install/) (usually included with Docker Desktop).
 
-### 1. Set Up Environment Variables
+### Running the Application
 
-The application uses environment variables for configuration. A template `.env.dev` file is provided.
-
-1.  **Copy the template:**
+1.  **Clone the repository:**
     ```bash
-    cp .env.dev .env
+    git clone <repository-url>
+    cd <repository-directory>
     ```
-2.  **(Optional)** Open the `.env` file and customize the settings if needed. The defaults are configured to work with the provided `docker-compose.yml`.
 
-### 2. Build and Run the Application
+2.  **Build and run the containers:**
+    Open a terminal in the project root and run the following command:
+    ```bash
+    docker compose up --build
+    ```
+    This command will:
+    - Build the Docker images for both the `backend` and `frontend` services.
+    - Start the containers.
+    - The `--build` flag ensures that the images are rebuilt if there are any changes to the Dockerfiles or source code.
 
-With Docker running, you can build and start all the services (backend API, PostgreSQL database, Redis, and pgAdmin) with a single command:
+3.  **Access the application:**
+    - The **Frontend Application** will be available at `http://localhost:3000`.
+    - The **Backend API** will be available at `http://localhost:8000`. You can access the auto-generated API documentation at `http://localhost:8000/docs`.
 
-```bash
-docker compose up --build -d
-```
+### Stopping the Application
 
-- `--build`: Forces a rebuild of the backend image if the `Dockerfile` or source code has changed.
-- `-d`: Runs the containers in detached mode (in the background).
+To stop the running containers, press `Ctrl + C` in the terminal where `docker compose up` is running.
 
-The API will be available at `http://localhost:8000`.
-
-### 3. Verify the Setup
-
-- **API Docs**: Navigate to `http://localhost:8000/docs` to see the interactive Swagger UI documentation.
-- **pgAdmin**: Access the pgAdmin database management tool at `http://localhost:5050`. Use the credentials from your `.env` file (`admin@agrotique.com` / `admin_password` by default) to log in. You will need to add a new server to connect to the `agrotique_db` container (use `db` as the hostname).
-- **Logs**: To view the logs from the running services:
-  ```bash
-  docker compose logs -f backend
-  ```
-
-## 🌱 Database Management
-
-The project includes several scripts in the `/scripts` directory to help manage the database.
-
-### Seeding the Database
-
-To populate the database with initial test data (users, gardens, plants), run the seed script:
-
-```bash
-docker compose exec backend python scripts/seed.py
-```
-
-### Backing Up the Database
-
-Create a compressed SQL backup of the database:
-
-```bash
-bash scripts/backup.sh
-```
-Backups are stored in the `/backups` directory.
-
-### Restoring the Database
-
-Restore the database from the most recent backup file. **Warning**: This will overwrite the current database.
-
-```bash
-bash scripts/restore.sh
-```
-To restore from a specific file, provide the path as an argument:
-```bash
-bash scripts/restore.sh backups/agrotique_dev_db_backup_YYYYMMDD_HHMMSS.sql
-```
-
-### Monitoring the Database
-
-Run a few simple checks to get a snapshot of the database's health, such as active connections and cache hit rate:
-
-```bash
-docker compose exec backend python scripts/monitor.py
-```
-
-## 🧪 Running Tests
-
-The project is set up for testing with `pytest`. To run the test suite:
-
-```bash
-docker compose exec backend pytest
-```
-
-## API Structure
-
-The API is versioned under `/api/v1`. The main endpoints are:
-
-- `/api/v1/users`: User registration, login, and management.
-- `/api/v1/gardens`: CRUD operations for user-owned gardens.
-- `/api/v1/plants`: CRUD operations for plants within a garden.
-
-Refer to the OpenAPI documentation (`/docs`) for detailed information on all available endpoints, schemas, and authentication requirements.
-
-## 🛑 Stopping the Application
-
-To stop all running containers:
-
+To stop and remove the containers, you can run:
 ```bash
 docker compose down
 ```
 
-To stop and remove the data volumes (deleting all database and pgAdmin data):
+## How It Works
 
-```bash
-docker compose down -v
-```
+- The **backend** is a FastAPI server that serves the plant data from a `plants.json` file. It provides several endpoints for searching, filtering, and retrieving plant information.
+- The **frontend** is a React single-page application (SPA) built with Vite. It communicates with the backend API to fetch plant data. The frontend is served by an Nginx web server in its Docker container.
+- **Docker Compose** orchestrates the two services, creating a network for them to communicate. The Vite development server's proxy is configured to forward requests from `/api` to the backend container, avoiding CORS issues during development and mimicking a production setup.
+- **Drag and Drop** is implemented using the `@dnd-kit` library, allowing users to drag plant cards from the palette to the garden canvas.
+- **State Management** for UI state like search filters is handled by React's `useState`. Global state, such as user favorites, is managed by `Zustand` for a simple and powerful solution.
+- **Data Fetching and Caching** is handled by `@tanstack/react-query`, which provides an excellent developer experience and robust caching, reducing the number of API calls and improving performance.

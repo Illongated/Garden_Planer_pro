@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Bell, Home, Package, Package2, Settings, Users, Sun, Moon } from 'lucide-react'
+import { Bell, Home, Package, Package2, Settings, Users, Sun, Moon, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useThemeContext } from '@/hooks/use-theme'
@@ -32,6 +32,10 @@ const Sidebar = () => {
             <NavLink to="/dashboard" className={navLinkClasses}>
               <Home className="h-4 w-4" />
               Dashboard
+            </NavLink>
+            <NavLink to="/planner" className={navLinkClasses}>
+              <LayoutGrid className="h-4 w-4" />
+              Planner
             </NavLink>
             <NavLink to="/gardens" className={navLinkClasses}>
               <Package className="h-4 w-4" />
