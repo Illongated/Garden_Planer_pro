@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  db_debug:
+    image: postgres:16-alpine
+    container_name: agrotique_db_debug
+    environment:
+      - POSTGRES_USER=agrotique_user
+      - POSTGRES_PASSWORD=agrotique_password
+      - POSTGRES_DB=agrotique_dev_db
+    ports:
+      - "5432:5432"
+    networks:
+      - agrotique_debug_net
+
+networks:
+  agrotique_debug_net:
+    driver: bridge

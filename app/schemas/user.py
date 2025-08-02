@@ -45,9 +45,11 @@ class UserPublic(UserBase):
 
     model_config = {"from_attributes": True}
 
-class PasswordReset(BaseModel):
+
+from .garden import Garden # Import here to avoid circular dependency issues
+
+class UserWithGardens(UserPublic):
     """
-    Schema for the password reset request.
+    Extends UserPublic to include a list of the user's gardens.
     """
-    token: str
-    new_password: str = Field(min_length=8)
+    gardens: list[Garden] = []

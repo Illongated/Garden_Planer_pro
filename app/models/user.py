@@ -1,6 +1,10 @@
 from sqlalchemy import String, Boolean
-from sqlalchemy.orm import Mapped, mapped_column, validates
+from sqlalchemy.orm import Mapped, mapped_column, validates, relationship
 from app.models.base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .garden import Garden
 
 class User(Base):
     """User model."""
@@ -11,6 +15,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationships
+    gardens: Mapped[list["Garden"]] = relationship("Garden", back_populates="owner", cascade="all, delete-orphan")
 
     @validates('email')
     def validate_email(self, key, email):
