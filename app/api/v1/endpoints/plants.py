@@ -1,78 +1,106 @@
-import json
-from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from redis.asyncio import Redis
-
-from app.schemas.plant import Plant
-from app.db.mock_data import PLANT_CATALOGUE
-from app.core.config import settings
+from app.db.session import get_db
+from app.models import User, Plant
+from app.schemas import PlantCreate, PlantUpdate, Plant as PlantSchema
+from app.crud import plant as crud_plant
+from app.crud import garden as crud_garden
+from app.api.deps import get_current_active_user
 
 router = APIRouter()
 
-def get_redis(request: Request) -> Redis:
-    return request.app.state.redis
-
-@router.get("/", response_model=List[Plant])
-async def search_plants(
-    request: Request,
-    q: Optional[str] = Query(None, description="Search term to query in plant name and description."),
-    sun: Optional[str] = Query(None, description="Filter by sun needs (e.g., 'Full Sun', 'Partial Shade')."),
-    water: Optional[str] = Query(None, description="Filter by water needs (e.g., 'Low', 'Moderate', 'High')."),
-    redis: Redis = Depends(get_redis)
+@router.post("/", response_model=PlantSchema, status_code=status.HTTP_201_CREATED)
+async def create_plant(
+    *,
+    db: AsyncSession = Depends(get_db),
+    plant_in: PlantCreate,
+    current_user: User = Depends(get_current_active_user)
 ):
     """
-    Search the plant catalogue with optional filters.
-    Results are cached in Redis for performance.
+    Create a new plant in a garden owned by the current user.
     """
-    # Create a unique cache key based on the query parameters
-    cache_key = f"plants_search:q={q}:sun={sun}:water={water}"
+    garden = await crud_garden.get(db=db, id=plant_in.garden_id)
+    if not garden:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Garden not found")
+    if garden.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions for this garden")
 
-    cached_result = await redis.get(cache_key)
-    if cached_result:
-        return json.loads(cached_result)
+    plant = await crud_plant.create(db=db, obj_in=plant_in)
+    return plant
 
-    # If not in cache, filter the data
-    results = [Plant(**p) for p in PLANT_CATALOGUE]
-
-    if q:
-        q_lower = q.lower()
-        results = [
-            p for p in results
-            if q_lower in p.name.lower() or q_lower in p.description.lower()
-        ]
-
-    if sun:
-        results = [p for p in results if p.sun_needs.lower() == sun.lower()]
-
-    if water:
-        results = [p for p in results if p.water_needs.lower() == water.lower()]
-
-    # Store the result in Redis with an expiration time
-    await redis.set(cache_key, json.dumps([p.dict() for p in results]), ex=settings.REDIS_CACHE_EXPIRE_SECONDS)
-
-    return results
-
-@router.get("/{plant_id}", response_model=Plant)
+@router.get("/{plant_id}", response_model=PlantSchema)
 async def read_plant(
-    plant_id: int,
-    redis: Redis = Depends(get_redis)
+    *,
+    db: AsyncSession = Depends(get_db),
+    plant_id: uuid.UUID,
+    current_user: User = Depends(get_current_active_user)
 ):
     """
-    Get a single plant by its ID.
-    Result is cached in Redis.
+    Retrieve a specific plant by ID.
     """
-    cache_key = f"plant:{plant_id}"
-
-    cached_result = await redis.get(cache_key)
-    if cached_result:
-        return json.loads(cached_result)
-
-    plant = next((Plant(**p) for p in PLANT_CATALOGUE if p["id"] == plant_id), None)
-
+    plant = await crud_plant.get_with_garden(db=db, id=plant_id)
     if not plant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found")
-
-    await redis.set(cache_key, plant.json(), ex=settings.REDIS_CACHE_EXPIRE_SECONDS)
-
+    if not plant.garden or plant.garden.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return plant
+
+@router.get("/by_garden/{garden_id}", response_model=list[PlantSchema])
+async def read_plants_by_garden(
+    *,
+    db: AsyncSession = Depends(get_db),
+    garden_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Retrieve all plants for a specific garden.
+    """
+    garden = await crud_garden.get(db=db, id=garden_id)
+    if not garden:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Garden not found")
+    if garden.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    plants = await crud_plant.get_multi_by_garden(db=db, garden_id=garden_id, skip=skip, limit=limit)
+    return plants
+
+@router.put("/{plant_id}", response_model=PlantSchema)
+async def update_plant(
+    *,
+    db: AsyncSession = Depends(get_db),
+    plant_id: uuid.UUID,
+    plant_in: PlantUpdate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Update a plant.
+    """
+    plant = await crud_plant.get_with_garden(db=db, id=plant_id)
+    if not plant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found")
+    if not plant.garden or plant.garden.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    plant = await crud_plant.update(db=db, db_obj=plant, obj_in=plant_in)
+    return plant
+
+@router.delete("/{plant_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_plant(
+    *,
+    db: AsyncSession = Depends(get_db),
+    plant_id: uuid.UUID,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Delete a plant.
+    """
+    plant = await crud_plant.get_with_garden(db=db, id=plant_id)
+    if not plant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found")
+    if not plant.garden or plant.garden.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    await crud_plant.remove(db=db, id=plant_id)
+    return

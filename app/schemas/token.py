@@ -9,8 +9,8 @@ class Token(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
-class TokenPayload(BaseModel):
+class TokenData(BaseModel):
     """
-    Data payload (the 'sub' claim) for a JWT.
+    Data payload for a JWT, stored in the 'sub' claim.
     """
-    sub: uuid.UUID
+    user_id: uuid.UUID | None = None

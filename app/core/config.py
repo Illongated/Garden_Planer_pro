@@ -20,12 +20,16 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # Database settings
-    # For production, use a robust database like PostgreSQL.
-    # For local development and to make this project runnable out-of-the-box, we use SQLite.
-    DATABASE_URL: str = "sqlite+aiosqlite:///./agrotique.db"
+    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/db"
+
+    # Database connection pool settings
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30  # seconds
+    DB_POOL_RECYCLE: int = 1800  # seconds (30 minutes)
 
     # Redis Settings
-    REDIS_HOST: str = "localhost"
+    REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     REDIS_CACHE_EXPIRE_SECONDS: int = 3600 # 1 hour

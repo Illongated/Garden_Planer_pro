@@ -18,8 +18,8 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.models.base import Base
-from app.models.user import User # Import all models here
+# Import all models here so Alembic can discover them
+from app.models import *
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
