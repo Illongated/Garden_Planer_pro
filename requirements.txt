@@ -2,3 +2,10 @@ fastapi
 uvicorn[standard]
 python-socketio
 websockets
+sqlalchemy
+psycopg2-binary
+alembic
+pydantic[email]
+passlib[bcrypt]
+asyncpg
+python-jose[cryptography]
