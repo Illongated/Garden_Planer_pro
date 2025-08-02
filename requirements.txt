@@ -1,12 +1,35 @@
+# --- Core FastAPI ---
 fastapi
 uvicorn[standard]
-redis
-python-jose[cryptography]
-passlib[bcrypt]
+python-multipart
 slowapi
+
+# --- Database & ORM ---
+sqlalchemy
+alembic
+asyncpg # For PostgreSQL in production
+aiosqlite # For SQLite in local development
+
+# --- Authentication & Security ---
+passlib[bcrypt]
+python-jose[cryptography]
+fastapi-csrf-protect
+itsdangerous
+
+# --- Email ---
+fastapi-mail
+email-validator
+
+# --- Caching & Background Tasks ---
+redis
+
+# --- Configuration ---
+pydantic-settings
+python-dotenv
+
+# --- Testing ---
 pytest
+pytest-asyncio
+pytest-mock
 requests
 httpx
-pydantic-settings
-email-validator
-python-multipart

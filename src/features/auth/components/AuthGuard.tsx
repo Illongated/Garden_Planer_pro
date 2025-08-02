@@ -1,21 +1,16 @@
 import { useAuth } from '../hooks/useAuth';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import LoadingSpinner from '@/components/loading-spinner';
-import { Suspense } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 
 const AuthGuard = () => {
   const { isAuthenticated } = useAuth();
-  const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // The AuthProvider will handle the loading state.
+    // If we get here and we are not authenticated, redirect to login.
+    return <Navigate to="/login" replace />;
   }
 
-  return (
-    <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><LoadingSpinner /></div>}>
-      <Outlet />
-    </Suspense>
-  );
+  return <Outlet />;
 };
 
 export default AuthGuard;

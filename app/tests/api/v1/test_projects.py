@@ -1,18 +1,28 @@
 import uuid
 from fastapi.testclient import TestClient
+from app.core import security
 
 # --- Helper function to get a valid token ---
 def get_auth_token(client: TestClient, email_prefix: str) -> str:
     email = f"{email_prefix}_{uuid.uuid4()}@example.com"
     password = "password123"
+
+    # Register the user
     client.post(
         "/api/v1/auth/register",
         json={"email": email, "full_name": f"{email_prefix} User", "password": password},
     )
+
+    # Manually verify the user's email for the test
+    verification_token = security.generate_verification_token(email)
+    client.get(f"/api/v1/auth/verify-email?token={verification_token}")
+
+    # Log in to get the token
     login_response = client.post(
         "/api/v1/auth/login",
         data={"username": email, "password": password},
     )
+    assert login_response.status_code == 200, f"Login failed for {email}"
     return login_response.json()["access_token"]
 
 

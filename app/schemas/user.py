@@ -40,5 +40,14 @@ class UserPublic(UserBase):
     Schema for returning a user to the client. Excludes the password.
     """
     id: uuid.UUID
+    is_active: bool
+    is_verified: bool
 
     model_config = {"from_attributes": True}
+
+class PasswordReset(BaseModel):
+    """
+    Schema for the password reset request.
+    """
+    token: str
+    new_password: str = Field(min_length=8)

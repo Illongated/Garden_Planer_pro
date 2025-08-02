@@ -1,28 +1,19 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { User } from '@/types'
+
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated'
 
 interface AuthState {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  setUser: (user: User | null) => void
+  accessToken: string | null
+  status: AuthStatus
   setToken: (token: string | null) => void
+  setStatus: (status: AuthStatus) => void
   logout: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      setUser: (user) => set((state) => ({ ...state, user, isAuthenticated: !!user })),
-      setToken: (token) => set((state) => ({ ...state, token })),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
-    }),
-    {
-      name: 'auth-storage', // name of the item in the storage (must be unique)
-    }
-  )
-)
+export const useAuthStore = create<AuthState>((set) => ({
+  accessToken: null,
+  status: 'loading', // Start in a loading state
+  setToken: (token) => set({ accessToken: token }),
+  setStatus: (status) => set({ status }),
+  logout: () => set({ accessToken: null, status: 'unauthenticated' }),
+}))

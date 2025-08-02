@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import ErrorBoundary from './components/error-boundary'
+import { AuthProvider } from './features/auth/context/AuthContext'
 
 const queryClient = new QueryClient()
 
