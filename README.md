@@ -1,85 +1,87 @@
-# Garden Planner
+# Agrotique Garden Planner API
 
-This is an intelligent, interactive web application for planning your garden. It helps you create optimized layouts for plants and irrigation systems.
+A modern, production-ready RESTful API for the Agrotique Garden Planner application. Built with FastAPI.
 
-## How to Run (Automated Setup)
+This backend service provides a complete solution for managing garden projects, searching a plant catalogue, and planning optimized layouts and irrigation systems. It features JWT authentication, real-time project synchronization via WebSockets, and Redis caching for high performance.
 
-This project includes scripts to automate the setup and execution process for both Windows and Unix-like systems (Linux, macOS, WSL).
+## ✨ Features
 
-### 1. Prerequisites
+- **🔐 JWT Authentication**: Secure endpoints with access and refresh tokens (`/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/me`).
+- **📝 Project Management**: Full CRUD operations for user-owned garden projects (`/projects`).
+- **WebSocket Real-time Sync**: Live project updates are broadcast to connected clients (`/ws/{project_id}`).
+- **🌱 Plant Catalogue**: A comprehensive, searchable, and filterable catalogue of plants (`/plants`).
+- **🧠 Layout Optimizer**: An endpoint to calculate an optimized garden layout based on plant positions and constraints (`/layout/optimize`). (Mock Implementation)
+- **💧 Irrigation Planner**: Endpoints to compute watering zones and flow/pressure requirements (`/irrigation`). (Mock Implementation)
+- **📤 Export System**: Export project plans to JSON, PDF, or PNG formats (`/export`). (PDF/PNG are Mock Implementations)
+- **⚡ High Performance**: Redis caching for plant catalogue and export results.
+- **🛡️ Secure & Robust**: Rate limiting, central error handling, and strict data validation with Pydantic.
+- **📚 OpenAPI Documentation**: Interactive API documentation (Swagger UI) available at `/docs`.
 
-- Python 3.7+
-- `git`
+## 🚀 Getting Started
 
-### 2. Setup
+### Prerequisites
+
+- Python 3.11+
+- Redis server (running on `localhost:6379` by default)
+
+### 1. Setup
 
 1.  **Clone the repository:**
     ```bash
     git clone <repository_url>
-    cd garden-planner
-    ```
-    *(Replace `<repository_url>` with the actual URL of the repository)*
-
-2.  **Run the appropriate setup script for your system:**
-
-    **For Windows:**
-    ```batch
-    setup.bat
+    cd <repository_directory>
     ```
 
-    **For Linux/macOS/WSL:**
-    ```bash
-    chmod +x setup.sh
-    ./setup.sh
-    ```
-
-### 3. Running the Application
-
-1.  **Run the appropriate application script for your system:**
-
-    **For Windows:**
-    ```batch
-    run.bat
-    ```
-
-    **For Linux/macOS/WSL:**
-    ```bash
-    chmod +x run.sh
-    ./run.sh
-    ```
-
-2.  **Open your web browser** and navigate to `http://localhost:8001`. You should see the Garden Planner application.
-
----
-
-## Why Use a Virtual Environment?
-
-The setup scripts automatically create a Python virtual environment (`venv`). This is a best practice for Python development for several reasons:
-
-- **Dependency Isolation:** It keeps the dependencies for this project separate from other projects on your system, preventing version conflicts.
-- **Reproducibility:** It ensures that the application is always run with the exact versions of the libraries it was tested with.
-- **Cleaner System:** It avoids cluttering your global Python installation with project-specific packages.
-
-You don't need to manually activate the virtual environment; the `run` scripts handle it for you.
-
-## Manual Setup (Alternative)
-
-If you prefer to set up the project manually, you can follow these steps:
-
-1.  **Create a virtual environment:**
+2.  **Create and activate a virtual environment:**
     ```bash
     python -m venv venv
+    source venv/bin/activate
+    # On Windows, use: venv\Scripts\activate
     ```
-2.  **Activate it:**
-    - **Windows:** `venv\Scripts\activate`
-    - **Linux/macOS:** `source venv/bin/activate`
-3.  **Install dependencies:**
+
+3.  **Install the required dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
-4.  **Run the server (from the project root):**
+
+### 2. Running the Application
+
+1.  **Start the FastAPI server:**
     ```bash
-    uvicorn backend.main:app --host 0.0.0.0 --port 8001
+    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ```
+    The `--reload` flag enables hot-reloading, which is useful for development.
+
+2.  **Access the API:**
+    The API will be available at `http://localhost:8000`.
+
+3.  **View the Interactive Documentation:**
+    Open your browser and navigate to `http://localhost:8000/docs`. You will see the Swagger UI, which allows you to interact with all the API endpoints.
+
+### 3. Running the Tests
+
+To ensure everything is working correctly, you can run the test suite using `pytest`.
+
+1.  **From the root of the project, run:**
+    ```bash
+    pytest
     ```
 
-*(If you see a "Not Found" error during manual setup, it is almost certainly because you are not running the `uvicorn` command from the root project directory.)*
+## 🏗️ Project Structure
+
+The project follows a modern, scalable structure:
+
+```
+app/
+├── api/              # API specific code
+│   └── v1/
+│       ├── endpoints/  # Individual endpoint files (auth.py, projects.py, etc.)
+│       └── api.py      # Main API router aggregating all endpoints
+├── core/             # Core components (config, security)
+├── db/               # Mock database data
+├── schemas/          # Pydantic schemas for data validation
+├── services/         # Business logic (optimizers, planners, websocket manager)
+├── tests/            # Pytest tests
+├── utils.py          # Utility functions
+└── main.py           # Main FastAPI application instance
+```
