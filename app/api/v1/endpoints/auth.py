@@ -118,7 +118,7 @@ async def verify_email(token: str, db: AsyncSession = Depends(get_db)):
     return {"message": "Email verified successfully. You can now log in."}
 
 
-@router.post("/login")
+@router.post("/login", response_model=Token)
 @limiter.limit("5/minute")
 async def login_for_access_token(
     request: Request,
@@ -149,8 +149,7 @@ async def login_for_access_token(
     access_token = security.create_access_token(subject=user.id)
     refresh_token, jti = security.create_refresh_token(subject=user.id)
 
-    content = {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
-    response = JSONResponse(content=content)
+    response = JSONResponse(content={"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token})
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
