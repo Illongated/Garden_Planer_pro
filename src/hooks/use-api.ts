@@ -5,7 +5,7 @@ import { useAuthStore } from '@/features/auth/store/auth.store'
 // to your backend. The useQuery and useMutation hooks from
 // @tanstack/react-query would wrap these calls.
 
-const API_BASE_URL = 'https://api.agrotique.com' // Example API base URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1' // Configurable API base URL
 
 export const useApi = () => {
   const { token } = useAuthStore()

@@ -597,5 +597,81 @@ class SecurityManager:
             "recent_events": len(self.audit_logger.get_events(hours=1))
         }
 
+# JWT Token Functions
+def create_access_token(subject: str, expires_delta: timedelta = None) -> str:
+    """Create JWT access token."""
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode = {
+        "sub": str(subject),
+        "exp": expire,
+        "type": "access",
+        "iat": datetime.utcnow(),
+        "jti": str(uuid.uuid4())
+    }
+    
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def create_refresh_token(subject: str) -> str:
+    """Create JWT refresh token."""
+    expire = datetime.utcnow() + timedelta(hours=settings.REFRESH_TOKEN_EXPIRE_HOURS)
+    
+    to_encode = {
+        "sub": str(subject),
+        "exp": expire,
+        "type": "refresh",
+        "iat": datetime.utcnow(),
+        "jti": str(uuid.uuid4())
+    }
+    
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def generate_verification_token(email: str) -> str:
+    """Generate email verification token."""
+    expire = datetime.utcnow() + timedelta(hours=24)  # 24 hours to verify
+    
+    to_encode = {
+        "email": email,
+        "exp": expire,
+        "type": "verification",
+        "iat": datetime.utcnow()
+    }
+    
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def generate_password_reset_token(email: str) -> str:
+    """Generate password reset token."""
+    expire = datetime.utcnow() + timedelta(hours=1)  # 1 hour to reset
+    
+    to_encode = {
+        "email": email,
+        "exp": expire,
+        "type": "reset",
+        "iat": datetime.utcnow()
+    }
+    
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def get_password_hash(password: str) -> str:
+    """Hash password using bcrypt."""
+    return SecurityUtils.hash_password(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify password against hash."""
+    return SecurityUtils.verify_password(plain_password, hashed_password)
+
+
 # Global security manager instance
 security_manager = SecurityManager()

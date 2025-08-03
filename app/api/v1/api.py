@@ -1,9 +1,13 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import users, gardens, plants, plant_catalog, agronomic, projects, security, project_management
+from app.api.v1.endpoints import auth, users, gardens, plants, plant_catalog, agronomic, projects, security, project_management
 
 api_router = APIRouter()
 
+# Authentication endpoints
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+
+# Other endpoints
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(gardens.router, prefix="/gardens", tags=["Gardens"])
 api_router.include_router(plants.router, prefix="/plants", tags=["Plants"])

@@ -92,3 +92,19 @@ async def send_password_reset_email(email_to: EmailStr, token: str):
     subject = "Password Reset for Agrotique Garden Planner"
     html_content = create_password_reset_email_html(token)
     await send_email([email_to], subject, html_content)
+
+
+class EmailService:
+    """Email service wrapper for easier testing and dependency injection."""
+    
+    async def send_verification_email(self, email_to: str, token: str):
+        """Send verification email."""
+        await send_verification_email(email_to, token)
+    
+    async def send_password_reset_email(self, email_to: str, token: str):
+        """Send password reset email."""
+        await send_password_reset_email(email_to, token)
+
+
+# Global email service instance
+email_service = EmailService()

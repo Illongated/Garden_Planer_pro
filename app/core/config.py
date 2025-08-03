@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "a_very_secret_key_that_is_long_and_secure"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    REFRESH_TOKEN_EXPIRE_HOURS: int = 168  # 7 days * 24 hours
     ALGORITHM: str = "HS256"
 
     # Database settings
