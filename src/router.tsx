@@ -13,6 +13,9 @@ import Settings from './pages/Settings'
 import GardenPlanner from './pages/GardenPlanner'
 import NotFound from './pages/NotFound'
 import GardenEditorPage from './features/garden-editor/pages/GardenEditorPage'
+import Scene3DPage from './features/3d-visualization/pages/Scene3DPage'
+import WebXRViewer from './features/3d-visualization/components/WebXRViewer'
+import ProjectManagementPage from './features/project-management/pages/ProjectManagementPage'
 
 export const router = createBrowserRouter([
   {
@@ -27,9 +30,13 @@ export const router = createBrowserRouter([
           { path: 'planner', element: <GardenPlanner /> },
           { path: 'gardens', element: <Gardens /> },
           { path: 'gardens/:gardenId', element: <GardenEditorPage /> },
+          { path: 'projects', element: <ProjectManagementPage /> },
           { path: 'settings', element: <Settings /> },
         ],
       },
+      // 3D Visualization routes (outside AppLayout for full-screen experience)
+      { path: '3d/:gardenId', element: <Scene3DPage /> },
+      { path: 'ar/:gardenId', element: <WebXRViewer /> },
     ],
   },
   {

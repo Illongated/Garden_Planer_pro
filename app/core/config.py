@@ -34,6 +34,24 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     REDIS_CACHE_EXPIRE_SECONDS: int = 3600 # 1 hour
 
+    # Performance Settings
+    ENABLE_COMPRESSION: bool = True
+    ENABLE_CACHING: bool = True
+    CACHE_TTL: int = 3600  # 1 hour
+    QUERY_TIMEOUT: int = 30  # seconds
+    MAX_CONCURRENT_REQUESTS: int = 100
+    RATE_LIMIT_PER_MINUTE: int = 60
+
+    # Monitoring Settings
+    ENABLE_METRICS: bool = True
+    METRICS_ENDPOINT: str = "/metrics"
+    ENABLE_HEALTH_CHECK: bool = True
+    HEALTH_CHECK_INTERVAL: int = 30  # seconds
+
+    # CDN Settings
+    CDN_URL: str = ""
+    STATIC_FILES_CDN: bool = False
+
     # Email settings for mailtrap
     SMTP_TLS: bool = True
     SMTP_PORT: int = 587

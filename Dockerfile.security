@@ -1,0 +1,100 @@
+# Security-Hardened Dockerfile for Agrotique Garden Planner Backend
+# Multi-stage build with security best practices
+
+# Stage 1: Build stage
+FROM python:3.11-slim as builder
+
+# Security: Use specific version and slim image
+LABEL maintainer="security@agrotique.com"
+LABEL description="Security-hardened FastAPI backend for Agrotique Garden Planner"
+
+# Security: Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Security: Install system dependencies with security updates
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Security: Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Security: Set working directory
+WORKDIR /app
+
+# Security: Copy requirements first for better caching
+COPY requirements.txt .
+
+# Security: Install Python dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Stage 2: Production stage
+FROM python:3.11-slim
+
+# Security: Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PATH="/home/appuser/.local/bin:$PATH"
+
+# Security: Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Security: Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Security: Create necessary directories with proper permissions
+RUN mkdir -p /app /app/logs /app/backups /app/uploads \
+    && chown -R appuser:appuser /app
+
+# Security: Set working directory
+WORKDIR /app
+
+# Security: Copy Python packages from builder
+COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
+
+# Security: Copy application code
+COPY --chown=appuser:appuser app/ ./app/
+COPY --chown=appuser:appuser alembic.ini .
+COPY --chown=appuser:appuser alembic/ ./alembic/
+
+# Security: Create security directories
+RUN mkdir -p /app/security/logs /app/security/audit \
+    && chown -R appuser:appuser /app/security \
+    && chmod 750 /app/security
+
+# Security: Set file permissions
+RUN find /app -type f -exec chmod 644 {} \; \
+    && find /app -type d -exec chmod 755 {} \; \
+    && chmod +x /app/app/main.py
+
+# Security: Switch to non-root user
+USER appuser
+
+# Security: Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Security: Expose port
+EXPOSE 8000
+
+# Security: Set security-related environment variables
+ENV SECURITY_ENABLED=true \
+    SECURITY_LOG_LEVEL=INFO \
+    SECURITY_AUDIT_ENABLED=true
+
+# Security: Run with security wrapper
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"] 

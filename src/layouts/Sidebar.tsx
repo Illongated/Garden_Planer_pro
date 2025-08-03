@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Bell, Home, Package, Package2, Settings, Users, Sun, Moon, LayoutGrid } from 'lucide-react'
+import { Bell, Home, Package, Package2, Settings, Users, Sun, Moon, LayoutGrid, GitBranch } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useThemeContext } from '@/hooks/use-theme'
@@ -40,6 +40,10 @@ const Sidebar = () => {
             <NavLink to="/gardens" className={navLinkClasses}>
               <Package className="h-4 w-4" />
               Gardens
+            </NavLink>
+            <NavLink to="/projects" className={navLinkClasses}>
+              <GitBranch className="h-4 w-4" />
+              Projects
             </NavLink>
             <NavLink to="/settings" className={navLinkClasses}>
               <Settings className="h-4 w-4" />

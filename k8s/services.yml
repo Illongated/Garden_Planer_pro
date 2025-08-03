@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: agrotique
+    component: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: agrotique
+    component: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: nginx
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: agrotique
+    component: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgresql
+  selector:
+    app: agrotique
+    component: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: agrotique
+    component: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: prometheus
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: 9090
+    protocol: TCP
+    name: http
+  selector:
+    app: agrotique
+    component: prometheus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: agrotique
+  labels:
+    app: agrotique
+    component: grafana
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: agrotique
+    component: grafana 
