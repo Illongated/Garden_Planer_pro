@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 import uuid
 
-from core.config import settings
-from db.session import get_db
+from app.core.config import settings
+from app.db.session import get_db
 from models import User
 from crud import user as crud_user
 from schemas.token import TokenData

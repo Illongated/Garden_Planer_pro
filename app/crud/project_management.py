@@ -2,11 +2,11 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_, or_, desc, asc
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
-from models.project_management import (
+from app.models.project_management import (
     PMProject, Task, Bug, ProjectCollaborator, ProjectMetrics, 
     UserActivity, Feedback, Release, CodeReview
 )
-from models.user import User
+from app.models.user import User
 from schemas.project_management import (
     ProjectCreate, ProjectUpdate, TaskCreate, TaskUpdate,
     BugCreate, BugUpdate, FeedbackCreate, FeedbackUpdate,

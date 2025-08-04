@@ -4,11 +4,11 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
-from models.project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
-from models.user import User
+from app.models.project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
+from app.models.user import User
 from schemas.project import ProjectCreate, ProjectUpdate, ProjectMemberCreate, ProjectVersionCreate, ProjectCommentCreate
-from crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
-from services.project_export_service import project_export_service
+from app.crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
+from app.services.project_export_service import project_export_service
 
 
 class TestProjectCRUD:

@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 from jose import jwt
 
-from core.config import settings
+from app.core.config import settings
 from core import security
 
 def test_user_registration(client: TestClient, mock_email_service: dict[str, MagicMock]):

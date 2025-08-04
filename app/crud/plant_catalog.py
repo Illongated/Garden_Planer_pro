@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional
 
-from crud.base import CRUDBase
-from models.plant_catalog import PlantCatalog
+from app.crud.base import CRUDBase
+from app.models.plant_catalog import PlantCatalog
 from schemas.plant_catalog import PlantCatalogCreate, PlantCatalog as PlantCatalogSchema
 
 class CRUDPlantCatalog(CRUDBase[PlantCatalog, PlantCatalogCreate, PlantCatalogSchema]):

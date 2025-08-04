@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from typing import Any, Dict, Optional, Union, List
 import uuid
 
-from crud.base import CRUDBase
+from app.crud.base import CRUDBase
 from models import Garden, User
 from schemas import GardenCreate, GardenUpdate
 

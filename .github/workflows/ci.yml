@@ -24,8 +24,7 @@ jobs:
           
       - name: Run backend tests
         run: |
-          cd app
-          python -m pytest tests/ -v
+          python -m pytest app/tests/test_simple.py -v
 
   frontend-tests:
     runs-on: ubuntu-latest

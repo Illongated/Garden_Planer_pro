@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 
-from core.config import settings
-from db.session import get_db
+from app.core.config import settings
+from app.db.session import get_db
 
 
 class DatabaseOptimizer:

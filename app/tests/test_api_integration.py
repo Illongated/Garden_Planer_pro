@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 from main import app
-from models.user import User
-from models.garden import Garden
-from models.plant import Plant
-from models.plant_catalog import PlantCatalog
-from core.security import create_access_token
-from crud.user import user as user_crud
+from app.models.user import User
+from app.models.garden import Garden
+from app.models.plant import Plant
+from app.models.plant_catalog import PlantCatalog
+from app.core.security import create_access_token
+from app.crud.user import user as user_crud
 from schemas.user import UserCreate
 
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSoc
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from api.deps import get_db, get_current_user
+from app.api.deps import get_db, get_current_user
 from schemas.user import UserPublic
 from schemas.project import (
     Project, ProjectCreate, ProjectUpdate, ProjectDetail, ProjectList,
@@ -17,9 +17,9 @@ from schemas.project import (
     ProjectWebSocketMessage, ProjectCollaborationMessage,
     ProjectPermission, ProjectStatus
 )
-from crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
-from services.websocket_manager import websocket_manager
-from services.project_export_service import project_export_service
+from app.crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
+from app.services.websocket_manager import websocket_manager
+from app.services.project_export_service import project_export_service
 from utils import UUIDEncoder
 
 router = APIRouter()

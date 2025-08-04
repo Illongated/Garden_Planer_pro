@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from schemas.layout import LayoutInput, LayoutOutput
 from services import layout_optimizer
-from api.v1.endpoints.auth import get_current_user
+from app.api.v1.endpoints.auth import get_current_user
 from schemas.user import UserPublic
 
 router = APIRouter()

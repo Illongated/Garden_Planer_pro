@@ -3,10 +3,10 @@ from datetime import datetime, date
 from decimal import Decimal
 from sqlalchemy.exc import IntegrityError
 
-from models.user import User
-from models.garden import Garden
-from models.plant import Plant
-from models.plant_catalog import PlantCatalog
+from app.models.user import User
+from app.models.garden import Garden
+from app.models.plant import Plant
+from app.models.plant_catalog import PlantCatalog
 
 
 class TestUserModel:

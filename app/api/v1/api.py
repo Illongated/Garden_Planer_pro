@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.v1.endpoints import auth, users, gardens, plants, plant_catalog, agronomic, projects, security, project_management
+from app.api.v1.endpoints import auth, users, gardens, plants, plant_catalog, agronomic, projects, security, project_management
 
 api_router = APIRouter()
 

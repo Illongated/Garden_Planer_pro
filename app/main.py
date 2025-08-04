@@ -15,10 +15,10 @@ from fastapi_csrf_protect import CsrfProtect
 from fastapi_csrf_protect.exceptions import CsrfProtectError
 from fastapi import status
 
-from core.config import settings
-from core.limiter import limiter
-from core.security import security_manager
-from api.v1.api import api_router
+from app.core.config import settings
+from app.core.limiter import limiter
+from app.core.security import security_manager
+from app.api.v1.api import api_router
 
 # --- Performance Monitoring ---
 class PerformanceMiddleware:

@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 from typing import List, Optional
 import uuid
 
-from crud.base import CRUDBase
+from app.crud.base import CRUDBase
 from models import Plant
 from schemas import PlantCreate, PlantUpdate
 

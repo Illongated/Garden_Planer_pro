@@ -10,9 +10,9 @@ from schemas.irrigation import (
     EquipmentSelectionInput, EquipmentSelectionResult, WeatherForecastInput, WeatherForecastResult,
     CostEstimationInput, CostEstimationResult, IrrigationZone, IrrigationPipe, IrrigationProject
 )
-from services.hydraulic_engine import HydraulicEngine
-from services.clustering_engine import ClusteringEngine
-from services.weather_service import WeatherService
+from app.services.hydraulic_engine import HydraulicEngine
+from app.services.clustering_engine import ClusteringEngine
+from app.services.weather_service import WeatherService
 
 logger = logging.getLogger(__name__)
 
