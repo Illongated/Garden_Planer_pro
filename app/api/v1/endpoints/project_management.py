@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from app.api.deps import get_current_user, get_db
-from app.crud.project_management import (
+from api.deps import get_current_user, get_db
+from crud.project_management import (
     project_crud, task_crud, bug_crud, feedback_crud, 
     release_crud, code_review_crud, project_metrics_crud, user_activity_crud
 )
-from app.schemas.project_management import (
+from schemas.project_management import (
     ProjectCreate, ProjectUpdate, ProjectResponse, ProjectListResponse,
     TaskCreate, TaskUpdate, TaskResponse, TaskListResponse,
     BugCreate, BugUpdate, BugResponse, BugListResponse,
@@ -18,7 +18,7 @@ from app.schemas.project_management import (
     DashboardMetrics, ProjectProgress, KanbanBoard, ProjectAnalytics,
     ProjectMetricsResponse, UserActivityResponse
 )
-from app.models.user import User
+from models.user import User
 
 router = APIRouter()
 

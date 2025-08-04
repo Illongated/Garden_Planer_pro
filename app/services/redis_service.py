@@ -11,7 +11,7 @@ from functools import wraps
 import redis.asyncio as redis
 from fastapi import Request
 
-from app.core.config import settings
+from core.config import settings
 
 
 class RedisCacheService:

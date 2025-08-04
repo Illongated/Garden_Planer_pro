@@ -5,7 +5,7 @@ from enum import Enum
 from sqlalchemy import String, ForeignKey, Float, Text, Boolean, JSON, Integer, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-from app.models.base import Base
+from models.base import Base
 from typing import TYPE_CHECKING, Dict, Any, List
 
 if TYPE_CHECKING:
@@ -160,7 +160,7 @@ class ProjectActivity(Base):
     # Activity data
     activity_type: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., 'project_created', 'layout_updated'
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    activity_metadata: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     
     # Relationships
     project: Mapped["Project"] = relationship("Project")

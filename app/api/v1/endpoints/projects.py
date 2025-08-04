@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSoc
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_user
-from app.schemas.user import UserPublic
-from app.schemas.project import (
+from api.deps import get_db, get_current_user
+from schemas.user import UserPublic
+from schemas.project import (
     Project, ProjectCreate, ProjectUpdate, ProjectDetail, ProjectList,
     ProjectMember, ProjectMemberCreate, ProjectMemberUpdate,
     ProjectVersion, ProjectVersionCreate,
@@ -17,17 +17,17 @@ from app.schemas.project import (
     ProjectWebSocketMessage, ProjectCollaborationMessage,
     ProjectPermission, ProjectStatus
 )
-from app.crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
-from app.services.websocket_manager import websocket_manager
-from app.services.project_export_service import project_export_service
-from app.utils import UUIDEncoder
+from crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
+from services.websocket_manager import websocket_manager
+from services.project_export_service import project_export_service
+from utils import UUIDEncoder
 
 router = APIRouter()
 
 # --- Project CRUD Endpoints ---
 
 @router.post("/", response_model=Project, status_code=status.HTTP_201_CREATED)
-def create_project(
+async def create_project(
     *,
     db: Session = Depends(get_db),
     project_in: ProjectCreate,

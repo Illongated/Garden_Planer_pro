@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import Optional
 
-from app.crud.base import CRUDBase
-from app.models import User
-from app.schemas import UserCreate, UserUpdate
-from app.core.security import verify_password, get_password_hash
+from crud.base import CRUDBase
+from models import User
+from schemas import UserCreate, UserUpdate
+from core.security import verify_password, get_password_hash
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> Optional[User]:

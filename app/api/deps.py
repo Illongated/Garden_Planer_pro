@@ -4,11 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 import uuid
 
-from app.core.config import settings
-from app.db.session import get_db
-from app.models import User
-from app.crud import user as crud_user
-from app.schemas.token import TokenData
+from core.config import settings
+from db.session import get_db
+from models import User
+from crud import user as crud_user
+from schemas.token import TokenData
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/users/login/access-token"

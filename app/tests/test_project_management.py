@@ -4,11 +4,11 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
-from app.models.project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
-from app.models.user import User
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectMemberCreate, ProjectVersionCreate, ProjectCommentCreate
-from app.crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
-from app.services.project_export_service import project_export_service
+from models.project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
+from models.user import User
+from schemas.project import ProjectCreate, ProjectUpdate, ProjectMemberCreate, ProjectVersionCreate, ProjectCommentCreate
+from crud.project import project_crud, project_member_crud, project_version_crud, project_comment_crud
+from services.project_export_service import project_export_service
 
 
 class TestProjectCRUD:
@@ -417,7 +417,7 @@ class TestProjectExportService:
     
     def test_import_project(self, db: Session, test_user: User):
         """Test importing a project."""
-        from app.schemas.project import ProjectImport
+        from schemas.project import ProjectImport
         
         import_data = ProjectImport(
             name="Imported Project",

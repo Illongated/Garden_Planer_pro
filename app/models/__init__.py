@@ -8,7 +8,7 @@ from .plant import Plant
 from .plant_catalog import PlantCatalog
 from .project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
 from .project_management import (
-    Project as PMProject, Task, Bug, ProjectCollaborator, ProjectMetrics, 
+    PMProject, Task, Bug, ProjectCollaborator, ProjectMetrics, 
     UserActivity, Feedback, Release, CodeReview, ProjectStatus as PMProjectStatus,
     TaskStatus, TaskPriority, BugSeverity
 )

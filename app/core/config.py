@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # Database settings
-    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/db"
+    DATABASE_URL: str = "sqlite:///./garden_planner.db"
 
     # Database connection pool settings
     DB_POOL_SIZE: int = 5

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from datetime import datetime
-from app.services.agronomic_engine import (
+from services.agronomic_engine import (
     AgronomicEngine, PlantSpecs, GardenZone, PlantPlacement,
     PlantType, WaterNeed, SunExposure, GrowthStage
 )

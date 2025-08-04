@@ -58,7 +58,7 @@ def mock_email_service():
 def client():
     """Create a test client"""
     try:
-        from app.main import app
+        from main import app
         with TestClient(app) as test_client:
             yield test_client
     except ImportError as e:

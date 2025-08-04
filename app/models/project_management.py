@@ -1,7 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, Float, Enum
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import List, Optional, Dict, Any
+from uuid import uuid4
+import uuid
+
+from sqlalchemy import String, DateTime, Text, Boolean, ForeignKey, JSON, Float, Enum, Integer, Column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-from app.models.base import Base
+from models.base import Base
 import enum
 
 
@@ -37,8 +42,8 @@ class BugSeverity(str, enum.Enum):
     CRITICAL = "critical"
 
 
-class Project(Base):
-    __tablename__ = "projects"
+class PMProject(Base):
+    __tablename__ = "pm_projects"
 
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -46,10 +51,10 @@ class Project(Base):
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     progress: Mapped[float] = mapped_column(Float, default=0.0)  # 0-100
-    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Additional project data
+    project_metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Additional project data
     
     # Relationships
-    owner = relationship("User", back_populates="projects")
+    owner = relationship("User", back_populates="pm_projects")
     tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
     bugs = relationship("Bug", back_populates="project", cascade="all, delete-orphan")
     metrics = relationship("ProjectMetrics", back_populates="project", cascade="all, delete-orphan")
@@ -63,7 +68,7 @@ class Task(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
     priority: Mapped[TaskPriority] = mapped_column(Enum(TaskPriority), default=TaskPriority.MEDIUM, index=True)
-    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("pm_projects.id"), nullable=False)
     assigned_to: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -74,7 +79,7 @@ class Task(Base):
     tags = Column(JSON)  # Array of tags
     
     # Relationships
-    project = relationship("Project", back_populates="tasks")
+    project = relationship("PMProject", back_populates="tasks")
     assigned_user = relationship("User", foreign_keys=[assigned_to])
     creator = relationship("User", foreign_keys=[created_by])
 
@@ -86,7 +91,7 @@ class Bug(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     severity: Mapped[BugSeverity] = mapped_column(Enum(BugSeverity), default=BugSeverity.MEDIUM, index=True)
     status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
-    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("pm_projects.id"), nullable=False)
     reported_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     assigned_to: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -98,7 +103,7 @@ class Bug(Base):
     environment = Column(String(255))  # Browser, OS, etc.
     
     # Relationships
-    project = relationship("Project", back_populates="bugs")
+    project = relationship("PMProject", back_populates="bugs")
     reporter = relationship("User", foreign_keys=[reported_by])
     assigned_user = relationship("User", foreign_keys=[assigned_to])
 
@@ -107,13 +112,13 @@ class ProjectCollaborator(Base):
     __tablename__ = "project_collaborators"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     role = Column(String(50), default="member")  # owner, admin, member, viewer
     joined_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
-    project = relationship("Project", back_populates="collaborators")
+    project = relationship("PMProject", back_populates="collaborators")
     user = relationship("User")
 
 
@@ -121,7 +126,7 @@ class ProjectMetrics(Base):
     __tablename__ = "project_metrics"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     date = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     
     # Development metrics
@@ -155,7 +160,7 @@ class ProjectMetrics(Base):
     tasks_overdue = Column(Integer, default=0)
     
     # Relationships
-    project = relationship("Project", back_populates="metrics")
+    project = relationship("PMProject", back_populates="metrics")
 
 
 class UserActivity(Base):
@@ -163,7 +168,7 @@ class UserActivity(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     activity_type = Column(String(100), nullable=False)  # login, feature_use, bug_report, etc.
     activity_data = Column(JSON)  # Additional activity data
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
@@ -171,7 +176,7 @@ class UserActivity(Base):
     
     # Relationships
     user = relationship("User")
-    project = relationship("Project")
+    project = relationship("PMProject")
 
 
 class Feedback(Base):
@@ -179,7 +184,7 @@ class Feedback(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     category = Column(String(100), nullable=False)  # bug, feature, general, performance
     title = Column(String(255), nullable=False)
     description = Column(Text)
@@ -192,14 +197,14 @@ class Feedback(Base):
     
     # Relationships
     user = relationship("User")
-    project = relationship("Project")
+    project = relationship("PMProject")
 
 
 class Release(Base):
     __tablename__ = "releases"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     version = Column(String(50), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
@@ -211,7 +216,7 @@ class Release(Base):
     changes = Column(JSON)  # List of changes/features/bug fixes
     
     # Relationships
-    project = relationship("Project")
+    project = relationship("PMProject")
     creator = relationship("User")
 
 
@@ -219,7 +224,7 @@ class CodeReview(Base):
     __tablename__ = "code_reviews"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    project_id = Column(Integer, ForeignKey("pm_projects.id"), nullable=False)
     reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     pull_request_url = Column(String(500))
@@ -232,6 +237,6 @@ class CodeReview(Base):
     review_data = Column(JSON)  # Review comments, suggestions, etc.
     
     # Relationships
-    project = relationship("Project")
+    project = relationship("PMProject")
     reviewer = relationship("User", foreign_keys=[reviewer_id])
     author = relationship("User", foreign_keys=[author_id]) 

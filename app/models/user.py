@@ -1,6 +1,6 @@
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, validates, relationship
-from app.models.base import Base
+from models.base import Base
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

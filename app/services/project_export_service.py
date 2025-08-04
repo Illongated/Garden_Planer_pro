@@ -9,9 +9,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 
-from app.models.project import Project, ProjectVersion, ProjectComment, ProjectActivity
-from app.schemas.project import ProjectExport, ProjectImport, ProjectCreate
-from app.crud.project import project_crud
+from models.project import Project, ProjectVersion, ProjectComment, ProjectActivity
+from schemas.project import ProjectExport, ProjectImport, ProjectCreate
+from crud.project import project_crud
 
 class ProjectExportService:
     """Service for exporting and importing projects in various formats."""
@@ -383,7 +383,7 @@ class ProjectExportService:
         )
         
         # Add import metadata as activity
-        from app.models.project import ProjectActivity
+        from models.project import ProjectActivity
         activity = ProjectActivity(
             project_id=project.id,
             user_id=owner_id,

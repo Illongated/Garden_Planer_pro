@@ -11,9 +11,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from app.core.security import security_manager, SecurityEvent
-from app.api.deps import get_current_user
-from app.models.user import User
+from core.security import security_manager, SecurityEvent
+from api.deps import get_current_user
+from models.user import User
 
 router = APIRouter()
 
@@ -143,7 +143,7 @@ async def get_security_config(
             detail="Insufficient permissions"
         )
     
-    from app.core.security import SECURITY_CONFIG
+    from core.security import SECURITY_CONFIG
     
     return SecurityConfigResponse(
         rate_limiting=SECURITY_CONFIG["rate_limiting"],

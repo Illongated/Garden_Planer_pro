@@ -19,13 +19,13 @@ from urllib.parse import urlparse
 import bcrypt
 import jwt
 from fastapi import HTTPException, Request, Response, status
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.db.session import get_db
+from core.config import settings
+from db.session import get_db
 
 # Configure security logging
 security_logger = logging.getLogger("security")

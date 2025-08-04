@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 import base64
 from datetime import datetime
 
-from app.schemas.irrigation import (
+from schemas.irrigation import (
     ZoneInput, ZoneOutput, FlowInput, FlowOutput, WateringZone,
     ClusteringInput, ClusteringResult, HydraulicCalculationInput, HydraulicCalculationResult,
     EquipmentSelectionInput, EquipmentSelectionResult, WeatherForecastInput, WeatherForecastResult,
@@ -16,14 +16,14 @@ from app.schemas.irrigation import (
     WeatherDataCreate, WeatherData as WeatherDataSchema, IrrigationProjectCreate, IrrigationProjectUpdate,
     IrrigationProject as IrrigationProjectSchema
 )
-from app.services.irrigation_planner import IrrigationPlanner
-from app.services.hydraulic_engine import HydraulicEngine
-from app.services.clustering_engine import ClusteringEngine
-from app.services.weather_service import WeatherService
-from app.services.technical_export import TechnicalExportService
-from app.api.deps import get_current_user, get_db
-from app.schemas.user import UserPublic
-from app.crud.irrigation import (
+from services.irrigation_planner import IrrigationPlanner
+from services.hydraulic_engine import HydraulicEngine
+from services.clustering_engine import ClusteringEngine
+from services.weather_service import WeatherService
+from services.technical_export import TechnicalExportService
+from api.deps import get_current_user, get_db
+from schemas.user import UserPublic
+from crud.irrigation import (
     irrigation_zone_crud, irrigation_equipment_crud, irrigation_schedule_crud,
     weather_data_crud, irrigation_project_crud
 )

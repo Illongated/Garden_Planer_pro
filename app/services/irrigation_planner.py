@@ -4,15 +4,15 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import asyncio
 
-from app.schemas.irrigation import (
+from schemas.irrigation import (
     ZoneInput, ZoneOutput, FlowInput, FlowOutput, WateringZone,
     ClusteringInput, ClusteringResult, HydraulicCalculationInput, HydraulicCalculationResult,
     EquipmentSelectionInput, EquipmentSelectionResult, WeatherForecastInput, WeatherForecastResult,
     CostEstimationInput, CostEstimationResult, IrrigationZone, IrrigationPipe, IrrigationProject
 )
-from app.services.hydraulic_engine import HydraulicEngine
-from app.services.clustering_engine import ClusteringEngine
-from app.services.weather_service import WeatherService
+from services.hydraulic_engine import HydraulicEngine
+from services.clustering_engine import ClusteringEngine
+from services.weather_service import WeatherService
 
 logger = logging.getLogger(__name__)
 

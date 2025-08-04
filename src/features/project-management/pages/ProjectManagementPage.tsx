@@ -31,7 +31,7 @@ interface ProjectManagementPageProps {
   className?: string;
 }
 
-export const ProjectManagementPage: React.FC<ProjectManagementPageProps> = ({ className }) => {
+const ProjectManagementPage: React.FC<ProjectManagementPageProps> = ({ className }) => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -404,4 +404,6 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSubmit, onCance
       </div>
     </form>
   );
-}; 
+};
+
+export default ProjectManagementPage; 

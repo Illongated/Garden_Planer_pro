@@ -1,4 +1,4 @@
-from app.schemas.layout import LayoutInput, LayoutOutput, PlantPosition
+from schemas.layout import LayoutInput, LayoutOutput, PlantPosition
 
 def optimize_layout(layout_input: LayoutInput) -> LayoutOutput:
     """
