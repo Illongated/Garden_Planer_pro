@@ -30,6 +30,7 @@ networkx==3.2.1
 pytest==7.4.3
 pytest-asyncio==0.21.1
 httpx==0.25.2
+fastapi[testing]==0.104.1
 
 # Optional: Redis for caching (can be disabled)
 redis==5.0.1
