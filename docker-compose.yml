@@ -1,22 +1,35 @@
-version: '3.8'
+# =============================================================================
+# Garden Planner Pro - Quick Start Development
+# Usage: docker-compose up
+# For full development: docker-compose -f docker-compose.dev.yml up
+# =============================================================================
+version: '3.9'
 
 services:
+  # Quick development setup - Backend only with external database
   backend:
-    build: ./backend
+    build:
+      context: .
+      target: development
+    container_name: garden_planner_quick_dev
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/garden_planner
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+      - ENVIRONMENT=development
+      - SECRET_KEY=quick-dev-secret-key
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/app:/app
-      - ./backend/data:/app/data
-    container_name: agrotique-backend
-    restart: unless-stopped
+      - .:/app
+      - /app/node_modules
+    networks:
+      - garden_planner_network
+    
+  # Note: This assumes you have PostgreSQL and Redis running locally
+  # For a complete setup with databases included, use:
+  # docker-compose -f docker-compose.dev.yml up
 
-  frontend:
-    build:
-      context: ./frontend
-    ports:
-      - "3000:80" # Nginx serves on port 80 inside the container
-    depends_on:
-      - backend
-    container_name: agrotique-frontend
-    restart: unless-stopped
+networks:
+  garden_planner_network:
+    driver: bridge
