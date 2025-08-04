@@ -61,6 +61,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest-cov pytest-asyncio pytest-mock
+        # Install additional test dependencies
+        pip install httpx[testing] asyncpg[testing] || echo "Some optional dependencies failed to install"
 
     - name: Run backend unit tests
       env:
