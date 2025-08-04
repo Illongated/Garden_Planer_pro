@@ -99,7 +99,7 @@ jobs:
           SMTP_USER: test
           SMTP_PASSWORD: test
           EMAILS_FROM_EMAIL: test@example.com
-          CLIENT_URL: http://localhost:3000
+          CLIENT_URL: http://localhost:5173
           CSRF_SECRET: test-csrf-secret-key
         run: |
           pytest app/tests/ --cov=app --cov-report=xml --cov-report=html
@@ -178,7 +178,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.backend
+          file: ./Dockerfile
+          target: production
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -189,7 +190,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.frontend
+          file: ./Dockerfile
+          target: frontend-production
           push: true
           tags: ${{ steps.meta.outputs.tags }}-frontend
           labels: ${{ steps.meta.outputs.labels }}
@@ -221,12 +223,12 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:main
             
             # Create backup before deployment
-            docker compose -f docker-compose.production.yml exec -T backup /backup.sh
+            docker compose --profile prod exec -T postgres-prod pg_dump -U agrotique_user agrotique > backup-$(date +%Y%m%d-%H%M%S).sql
             
             # Blue-green deployment
-            if docker compose -f docker-compose.production.yml ps -q | grep -q .; then
+            if docker compose --profile prod ps -q | grep -q .; then
               # Stop current deployment
-              docker compose -f docker-compose.production.yml down
+              docker compose --profile prod down
             fi
             
             # Update images
@@ -234,7 +236,7 @@ jobs:
             docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:main agrotique-frontend:latest
             
             # Start new deployment
-            docker compose -f docker-compose.production.yml up -d
+            docker compose --profile prod up -d
             
             # Health check
             sleep 30
@@ -243,7 +245,7 @@ jobs:
             else
               echo "Deployment failed - rolling back"
               docker compose -f docker-compose.production.yml down
-              docker compose -f docker-compose.production.yml up -d
+              docker compose --profile prod up -d
               exit 1
             fi
 

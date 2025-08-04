@@ -80,7 +80,7 @@ CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --
 # -----------------------------------------------------------------------------
 # Stage 4: Production Backend
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim-bookworm as backend-production
+FROM python:3.11-slim-bookworm as production
 
 # Production environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -132,8 +132,8 @@ FROM nginx:alpine as frontend-production
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Copy custom nginx configuration
-COPY docker/nginx/frontend.conf /etc/nginx/conf.d/default.conf
+# Copy unified nginx configuration
+COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # Copy built application from frontend builder
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html

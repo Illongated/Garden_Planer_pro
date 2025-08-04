@@ -24,7 +24,7 @@ os.environ.update({
     "SMTP_USER": "test",
     "SMTP_PASSWORD": "test",
     "EMAILS_FROM_EMAIL": "test@example.com",
-    "CLIENT_URL": "http://localhost:3000",
+            "CLIENT_URL": "http://localhost:5173",
     "CSRF_SECRET": "test-csrf-secret-key"
 })
 

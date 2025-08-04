@@ -81,8 +81,8 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
-      target: production
+      dockerfile: Dockerfile
+      target: frontend
     container_name: agrotique-frontend
     restart: unless-stopped
     ports:

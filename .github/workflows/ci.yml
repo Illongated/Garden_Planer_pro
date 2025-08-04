@@ -78,7 +78,7 @@ jobs:
         SMTP_USER: test
         SMTP_PASSWORD: test
         EMAILS_FROM_EMAIL: test@example.com
-        CLIENT_URL: http://localhost:3000
+        CLIENT_URL: http://localhost:5173
         CSRF_SECRET: test-csrf-secret-key
       run: |
         pytest app/tests/ -v --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing
@@ -207,7 +207,7 @@ jobs:
         SMTP_USER: test
         SMTP_PASSWORD: test
         EMAILS_FROM_EMAIL: test@example.com
-        CLIENT_URL: http://localhost:3000
+        CLIENT_URL: http://localhost:5173
         CSRF_SECRET: test-csrf-secret-key
       run: |
         # Start the application in background
@@ -242,7 +242,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        target: backend-production
+        target: production
         push: false
         tags: garden-planner:backend
         cache-from: type=gha
@@ -356,8 +356,8 @@ jobs:
       run: |
         echo "Deploying to staging environment..."
         # Add your staging deployment logic here
-        # Example: kubectl apply -f k8s/staging/
-        # Example: docker-compose -f docker-compose.staging.yml up -d
+        # Example: kubectl apply -f k8s/agrotique-all-in-one.yml
+        # Example: docker-compose --profile dev up -d
 
   deploy-production:
     name: Deploy to Production
@@ -371,8 +371,8 @@ jobs:
       run: |
         echo "Deploying to production environment..."
         # Add your production deployment logic here
-        # Example: kubectl apply -f k8s/production/
-        # Example: docker-compose -f docker-compose.production.yml up -d
+        # Example: kubectl apply -f k8s/agrotique-all-in-one.yml
+        # Example: docker-compose --profile prod up -d
 
   notify:
     name: Notify Team

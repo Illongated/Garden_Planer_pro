@@ -68,7 +68,7 @@ class WebSocketService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || 'ws://localhost:8000';
+    this.baseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
   }
 
   public async connect(userId: string): Promise<void> {

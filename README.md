@@ -122,9 +122,9 @@ The Intelligent Irrigation Design System provides comprehensive irrigation plann
    ```
 
 4. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
+   - Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
 
 ## API Endpoints
 

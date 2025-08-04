@@ -35,7 +35,7 @@ def create_verification_email_html(token: str) -> str:
     Creates the HTML content for the verification email.
     """
     # In a real app, you'd use a proper HTML template engine like Jinja2
-    verification_url = f"http://localhost:5173/verify-email?token={token}"
+            verification_url = f"{settings.CLIENT_URL}/verify-email?token={token}"
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
@@ -66,7 +66,7 @@ def create_password_reset_email_html(token: str) -> str:
     """
     Creates the HTML content for the password reset email.
     """
-    reset_url = f"http://localhost:5173/reset-password?token={token}"
+            reset_url = f"{settings.CLIENT_URL}/reset-password?token={token}"
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
