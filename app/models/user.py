@@ -27,7 +27,7 @@ class User(Base):
     project_activities: Mapped[list["ProjectActivity"]] = relationship("ProjectActivity", foreign_keys="ProjectActivity.user_id", back_populates="user", cascade="all, delete-orphan")
     
     # Project Management relationships
-    pm_projects: Mapped[list["PMProject"]] = relationship("Project", foreign_keys="PMProject.owner_id", back_populates="owner", cascade="all, delete-orphan")
+    pm_projects: Mapped[list["PMProject"]] = relationship("PMProject", foreign_keys="PMProject.owner_id", back_populates="owner", cascade="all, delete-orphan")
     created_tasks: Mapped[list["Task"]] = relationship("Task", foreign_keys="Task.created_by", back_populates="creator", cascade="all, delete-orphan")
     assigned_tasks: Mapped[list["Task"]] = relationship("Task", foreign_keys="Task.assigned_to", back_populates="assigned_user")
     reported_bugs: Mapped[list["Bug"]] = relationship("Bug", foreign_keys="Bug.reported_by", back_populates="reporter", cascade="all, delete-orphan")

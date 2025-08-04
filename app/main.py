@@ -186,25 +186,64 @@ async def health_check():
         "environment": settings.ENVIRONMENT
     }
 
-# --- Performance Metrics Endpoint ---
+# --- Performance Metrics Endpoints ---
+performance_metrics_store = {}
+cache_stats_store = {}
+database_stats_store = {}
+
 @app.post("/api/v1/performance/metrics", tags=["Performance"])
 async def receive_performance_metrics(request: Request):
     """Receive performance metrics from frontend."""
     try:
         metrics = await request.json()
         
-        # Log metrics for monitoring
+        # Store metrics for retrieval
+        performance_metrics_store["latest"] = {
+            **metrics,
+            "timestamp": time.time()
+        }
+        
         print(f"Performance metrics received: {metrics}")
-        
-        # Here you could store metrics in a database or send to monitoring service
-        # For now, we'll just log them
-        
         return {"status": "received"}
     except Exception as e:
         return JSONResponse(
             status_code=400,
             content={"detail": f"Invalid metrics format: {str(e)}"}
         )
+
+@app.get("/api/v1/performance/metrics", tags=["Performance"])
+async def get_performance_metrics():
+    """Get latest performance metrics."""
+    return performance_metrics_store.get("latest", {
+        "status": "no_data",
+        "message": "No metrics available yet"
+    })
+
+@app.get("/api/v1/performance/cache-stats", tags=["Performance"])
+async def get_cache_stats():
+    """Get cache statistics."""
+    # Mock cache stats - in real implementation, get from Redis/cache service
+    return {
+        "hit_rate": 0.85,
+        "miss_rate": 0.15,
+        "total_requests": 1000,
+        "cache_size": "50MB",
+        "memory_usage": 0.6,
+        "timestamp": time.time()
+    }
+
+@app.get("/api/v1/performance/database-stats", tags=["Performance"])
+async def get_database_stats():
+    """Get database statistics."""
+    # Mock database stats - in real implementation, get from database monitoring
+    return {
+        "active_connections": 5,
+        "max_connections": 100,
+        "query_time_avg": 0.05,
+        "slow_queries": 2,
+        "database_size": "120MB",
+        "timestamp": time.time()
+    }
 
 # --- API Router ---
 app.include_router(api_router, prefix=settings.API_V1_STR)

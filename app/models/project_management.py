@@ -40,16 +40,13 @@ class BugSeverity(str, enum.Enum):
 class Project(Base):
     __tablename__ = "projects"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False, index=True)
-    description = Column(Text)
-    status = Column(Enum(ProjectStatus), default=ProjectStatus.PLANNING, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    due_date = Column(DateTime(timezone=True))
-    progress = Column(Float, default=0.0)  # 0-100
-    metadata = Column(JSON)  # Additional project data
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[ProjectStatus] = mapped_column(Enum(ProjectStatus), default=ProjectStatus.PLANNING, index=True)
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    progress: Mapped[float] = mapped_column(Float, default=0.0)  # 0-100
+    metadata: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Additional project data
     
     # Relationships
     owner = relationship("User", back_populates="projects")
@@ -62,14 +59,13 @@ class Project(Base):
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    status = Column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
-    priority = Column(Enum(TaskPriority), default=TaskPriority.MEDIUM, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    assigned_to = Column(Integer, ForeignKey("users.id"))
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
+    priority: Mapped[TaskPriority] = mapped_column(Enum(TaskPriority), default=TaskPriority.MEDIUM, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    assigned_to: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     due_date = Column(DateTime(timezone=True))
@@ -86,14 +82,13 @@ class Task(Base):
 class Bug(Base):
     __tablename__ = "bugs"
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    severity = Column(Enum(BugSeverity), default=BugSeverity.MEDIUM, index=True)
-    status = Column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    reported_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    assigned_to = Column(Integer, ForeignKey("users.id"))
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    severity: Mapped[BugSeverity] = mapped_column(Enum(BugSeverity), default=BugSeverity.MEDIUM, index=True)
+    status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    reported_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+    assigned_to: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     resolved_at = Column(DateTime(timezone=True))

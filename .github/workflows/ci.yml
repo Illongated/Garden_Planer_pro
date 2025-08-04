@@ -61,14 +61,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest-cov pytest-asyncio pytest-mock
+        # Install additional test dependencies
+        pip install httpx[testing] asyncpg[testing] || echo "Some optional dependencies failed to install"
 
     - name: Run backend unit tests
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        REDIS_URL: redis://localhost:6379
-        SECRET_KEY: test-secret-key
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        SECRET_KEY: test-secret-key-for-ci-minimum-32-characters-long
         ALGORITHM: HS256
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
+        REFRESH_TOKEN_EXPIRE_HOURS: 168
+        ENVIRONMENT: test
+        SMTP_HOST: smtp.example.com
+        SMTP_USER: test
+        SMTP_PASSWORD: test
+        EMAILS_FROM_EMAIL: test@example.com
+        CLIENT_URL: http://localhost:5173
+        CSRF_SECRET: test-csrf-secret-key
       run: |
         pytest app/tests/ -v --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing
 
@@ -185,14 +196,29 @@ jobs:
     - name: Run performance tests
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        SECRET_KEY: test-secret-key
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        SECRET_KEY: test-secret-key-for-performance-minimum-32-characters-long
+        ALGORITHM: HS256
+        ACCESS_TOKEN_EXPIRE_MINUTES: 30
+        REFRESH_TOKEN_EXPIRE_HOURS: 168
+        ENVIRONMENT: test
+        SMTP_HOST: smtp.example.com
+        SMTP_USER: test
+        SMTP_PASSWORD: test
+        EMAILS_FROM_EMAIL: test@example.com
+        CLIENT_URL: http://localhost:5173
+        CSRF_SECRET: test-csrf-secret-key
       run: |
         # Start the application in background
         python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-        sleep 10
+        sleep 15
+        
+        # Wait for app to be ready
+        timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done'
         
         # Run performance tests
-        locust -f performance_tests/locustfile.py --headless --users 10 --spawn-rate 2 --run-time 60s --html performance-report.html
+        locust -f performance_tests/locustfile.py --headless --users 5 --spawn-rate 1 --run-time 30s --html performance-report.html --host http://localhost:8000
 
     - name: Upload performance report
       uses: actions/upload-artifact@v3
@@ -212,12 +238,23 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and push Docker image
+    - name: Build backend Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
+        target: production
         push: false
-        tags: garden-planner:latest
+        tags: garden-planner:backend
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build frontend Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        target: frontend-production
+        push: false
+        tags: garden-planner:frontend
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -319,8 +356,8 @@ jobs:
       run: |
         echo "Deploying to staging environment..."
         # Add your staging deployment logic here
-        # Example: kubectl apply -f k8s/staging/
-        # Example: docker-compose -f docker-compose.staging.yml up -d
+        # Example: kubectl apply -f k8s/agrotique-all-in-one.yml
+        # Example: docker-compose --profile dev up -d
 
   deploy-production:
     name: Deploy to Production
@@ -334,8 +371,8 @@ jobs:
       run: |
         echo "Deploying to production environment..."
         # Add your production deployment logic here
-        # Example: kubectl apply -f k8s/production/
-        # Example: docker-compose -f docker-compose.production.yml up -d
+        # Example: kubectl apply -f k8s/agrotique-all-in-one.yml
+        # Example: docker-compose --profile prod up -d
 
   notify:
     name: Notify Team

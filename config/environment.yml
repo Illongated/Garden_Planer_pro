@@ -1,0 +1,342 @@
+# =============================================================================
+# Agrotique Garden Planner - Unified Environment Configuration
+# =============================================================================
+# This file contains all environment configurations for different deployment scenarios
+# Usage: Use environment-specific sections based on your deployment
+# =============================================================================
+
+# =============================================================================
+# DEVELOPMENT ENVIRONMENT
+# =============================================================================
+development:
+  # Application Settings
+  ENVIRONMENT: development
+  PROJECT_NAME: "Agrotique Garden Planner (Dev)"
+  API_V1_STR: "/api/v1"
+  DEBUG: true
+  LOG_LEVEL: DEBUG
+  
+  # Security (Development only - DO NOT use in production)
+  SECRET_KEY: "dev-secret-key-not-for-production-32-chars-min"
+  CSRF_SECRET: "dev-csrf-secret-key-not-for-production"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: 30
+  REFRESH_TOKEN_EXPIRE_HOURS: 168  # 7 days
+  
+  # Database
+  DATABASE_URL: "postgresql+asyncpg://garden_planner_user:dev_password@localhost:5432/garden_planner_dev"
+  DB_POOL_SIZE: 5
+  DB_MAX_OVERFLOW: 10
+  DB_POOL_TIMEOUT: 30
+  DB_POOL_RECYCLE: 1800
+  
+  # Redis Cache
+  REDIS_HOST: "localhost"
+  REDIS_PORT: 6379
+  REDIS_DB: 0
+  REDIS_CACHE_EXPIRE_SECONDS: 3600
+  
+  # Frontend
+  CLIENT_URL: "http://localhost:5173"
+  CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+  ALLOWED_HOSTS: "localhost,127.0.0.1"
+  
+  # Email (Development - use MailHog or similar)
+  SMTP_TLS: true
+  SMTP_PORT: 1025
+  SMTP_HOST: "localhost"
+  SMTP_USER: ""
+  SMTP_PASSWORD: ""
+  EMAILS_FROM_EMAIL: "dev@agrotique.local"
+  EMAILS_FROM_NAME: "Agrotique Dev"
+  
+  # Performance & Features
+  ENABLE_COMPRESSION: true
+  ENABLE_CACHING: false  # Disable for development
+  ENABLE_METRICS: true
+  ENABLE_HEALTH_CHECK: true
+  RATE_LIMIT_PER_MINUTE: 1000  # Relaxed for dev
+  
+  # Monitoring
+  PROMETHEUS_PORT: 9090
+  GRAFANA_PORT: 3001
+
+# =============================================================================
+# TEST ENVIRONMENT
+# =============================================================================
+test:
+  # Application Settings
+  ENVIRONMENT: test
+  PROJECT_NAME: "Agrotique Garden Planner (Test)"
+  API_V1_STR: "/api/v1"
+  DEBUG: false
+  LOG_LEVEL: INFO
+  
+  # Security (Test only)
+  SECRET_KEY: "test-secret-key-for-testing-minimum-32-characters-long"
+  CSRF_SECRET: "test-csrf-secret-key-for-testing"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: 5  # Short for testing
+  REFRESH_TOKEN_EXPIRE_HOURS: 1
+  
+  # Database (In-memory for speed)
+  DATABASE_URL: "postgresql+asyncpg://test_user:test_password@localhost:5433/garden_planner_test"
+  DB_POOL_SIZE: 2
+  DB_MAX_OVERFLOW: 5
+  
+  # Redis Cache
+  REDIS_HOST: "localhost"
+  REDIS_PORT: 6380
+  REDIS_DB: 1
+  REDIS_CACHE_EXPIRE_SECONDS: 300
+  
+  # Frontend
+  CLIENT_URL: "http://localhost:5173"
+  CORS_ORIGINS: "http://localhost:5173"
+  ALLOWED_HOSTS: "localhost,127.0.0.1"
+  
+  # Email (Disabled for tests)
+  SMTP_TLS: false
+  SMTP_PORT: 587
+  SMTP_HOST: "localhost"
+  SMTP_USER: "test"
+  SMTP_PASSWORD: "test"
+  EMAILS_FROM_EMAIL: "test@example.com"
+  EMAILS_FROM_NAME: "Test"
+  
+  # Performance & Features (Optimized for testing)
+  ENABLE_COMPRESSION: false
+  ENABLE_CACHING: false
+  ENABLE_METRICS: false
+  ENABLE_HEALTH_CHECK: true
+  RATE_LIMIT_PER_MINUTE: 10000  # No limits for tests
+
+# =============================================================================
+# PRODUCTION ENVIRONMENT
+# =============================================================================
+production:
+  # Application Settings
+  ENVIRONMENT: production
+  PROJECT_NAME: "Agrotique Garden Planner"
+  API_V1_STR: "/api/v1"
+  DEBUG: false
+  LOG_LEVEL: INFO
+  
+  # Security (Use environment variables for actual values)
+  SECRET_KEY: "${SECRET_KEY}"  # Must be provided via env vars
+  CSRF_SECRET: "${CSRF_SECRET}"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: 30
+  REFRESH_TOKEN_EXPIRE_HOURS: 168
+  
+  # Database
+  DATABASE_URL: "postgresql://agrotique_user:${POSTGRES_PASSWORD}@postgres:5432/agrotique"
+  DB_POOL_SIZE: 10
+  DB_MAX_OVERFLOW: 20
+  DB_POOL_TIMEOUT: 30
+  DB_POOL_RECYCLE: 3600
+  
+  # Redis Cache
+  REDIS_HOST: "redis"
+  REDIS_PORT: 6379
+  REDIS_DB: 0
+  REDIS_PASSWORD: "${REDIS_PASSWORD}"
+  REDIS_URL: "redis://:${REDIS_PASSWORD}@redis:6379/0"
+  REDIS_CACHE_EXPIRE_SECONDS: 3600
+  
+  # Frontend
+  CLIENT_URL: "https://agrotique.example.com"
+  CORS_ORIGINS: "https://agrotique.example.com,https://www.agrotique.example.com"
+  ALLOWED_HOSTS: "agrotique.example.com,www.agrotique.example.com"
+  
+  # Email (Production SMTP)
+  SMTP_TLS: true
+  SMTP_PORT: 587
+  SMTP_HOST: "${SMTP_HOST}"
+  SMTP_USER: "${SMTP_USER}"
+  SMTP_PASSWORD: "${SMTP_PASSWORD}"
+  EMAILS_FROM_EMAIL: "noreply@agrotique.com"
+  EMAILS_FROM_NAME: "Agrotique Garden Planner"
+  
+  # Performance & Features
+  ENABLE_COMPRESSION: true
+  ENABLE_CACHING: true
+  CACHE_TTL: 3600
+  QUERY_TIMEOUT: 30
+  MAX_CONCURRENT_REQUESTS: 100
+  RATE_LIMIT_PER_MINUTE: 60
+  ENABLE_METRICS: true
+  ENABLE_HEALTH_CHECK: true
+  HEALTH_CHECK_INTERVAL: 30
+  
+  # CDN Settings
+  CDN_URL: "${CDN_URL}"
+  STATIC_FILES_CDN: true
+  
+  # Monitoring
+  PROMETHEUS_PORT: 9090
+  GRAFANA_PORT: 3000
+  GRAFANA_PASSWORD: "${GRAFANA_PASSWORD}"
+  
+  # External Services
+  SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
+  SENTRY_DSN: "${SENTRY_DSN}"
+  
+  # Backup & Security
+  BACKUP_ENCRYPTION_KEY: "${BACKUP_ENCRYPTION_KEY}"
+  BACKUP_RETENTION_DAYS: 30
+  
+  # SSL/TLS
+  DOMAIN: "${DOMAIN}"
+  EMAIL: "${ADMIN_EMAIL}"
+  
+  # Weather API (Optional)
+  WEATHER_API_KEY: "${WEATHER_API_KEY}"
+  WEATHER_BASE_URL: "https://api.openweathermap.org/data/2.5"
+
+# =============================================================================
+# STAGING ENVIRONMENT
+# =============================================================================
+staging:
+  # Inherits from production but with relaxed settings
+  <<: *production
+  
+  # Override specific settings for staging
+  ENVIRONMENT: staging
+  PROJECT_NAME: "Agrotique Garden Planner (Staging)"
+  LOG_LEVEL: DEBUG
+  
+  # Staging-specific URLs
+  CLIENT_URL: "https://staging.agrotique.example.com"
+  CORS_ORIGINS: "https://staging.agrotique.example.com"
+  ALLOWED_HOSTS: "staging.agrotique.example.com"
+  
+  # Relaxed rate limiting for testing
+  RATE_LIMIT_PER_MINUTE: 200
+  
+  # Shorter retention for staging
+  BACKUP_RETENTION_DAYS: 7
+
+# =============================================================================
+# DOCKER COMPOSE ENVIRONMENT VARIABLES
+# =============================================================================
+# For use with docker-compose profiles
+docker:
+  # These map to the unified docker-compose.yml profiles
+  
+  # Quick development (default profile)
+  quick:
+    <<: *development
+    DATABASE_URL: "postgresql+asyncpg://postgres:password@host.docker.internal:5432/garden_planner"
+    REDIS_HOST: "host.docker.internal"
+  
+  # Full development profile
+  dev:
+    <<: *development
+    DATABASE_URL: "postgresql+asyncpg://garden_planner_user:dev_password@postgres-dev:5432/garden_planner_dev"
+    REDIS_HOST: "redis-dev"
+  
+  # Test profile
+  test:
+    <<: *test
+    DATABASE_URL: "postgresql+asyncpg://test_user:test_password@postgres-test:5432/garden_planner_test"
+    REDIS_HOST: "redis-test"
+    REDIS_PORT: 6379
+  
+  # Production profile
+  prod:
+    <<: *production
+
+# =============================================================================
+# KUBERNETES ENVIRONMENT VARIABLES
+# =============================================================================
+kubernetes:
+  # ConfigMap values (non-sensitive)
+  config:
+    ENVIRONMENT: "production"
+    LOG_LEVEL: "INFO"
+    DATABASE_URL: "postgresql://agrotique_user:$(POSTGRES_PASSWORD)@postgres-service:5432/agrotique"
+    REDIS_URL: "redis://:$(REDIS_PASSWORD)@redis-service:6379/0"
+    CORS_ORIGINS: "https://agrotique.example.com,https://www.agrotique.example.com"
+    ALLOWED_HOSTS: "agrotique.example.com,www.agrotique.example.com"
+  
+  # Secret values (base64 encoded in actual deployment)
+  secrets:
+    - SECRET_KEY
+    - POSTGRES_PASSWORD
+    - REDIS_PASSWORD
+    - GRAFANA_PASSWORD
+    - BACKUP_ENCRYPTION_KEY
+    - SLACK_WEBHOOK_URL
+    - SMTP_PASSWORD
+    - WEATHER_API_KEY
+
+# =============================================================================
+# FEATURE FLAGS
+# =============================================================================
+features:
+  # Core Features
+  ENABLE_USER_REGISTRATION: true
+  ENABLE_EMAIL_VERIFICATION: true
+  ENABLE_PASSWORD_RESET: true
+  ENABLE_2FA: false  # Future feature
+  
+  # Garden Features
+  ENABLE_3D_VISUALIZATION: true
+  ENABLE_WEATHER_INTEGRATION: true
+  ENABLE_AI_RECOMMENDATIONS: true
+  ENABLE_IRRIGATION_PLANNER: true
+  
+  # Advanced Features
+  ENABLE_COLLABORATION: true
+  ENABLE_PROJECT_SHARING: true
+  ENABLE_EXPORT_PDF: true
+  ENABLE_EXPORT_CAD: false  # Future feature
+  
+  # Monitoring & Analytics
+  ENABLE_PERFORMANCE_MONITORING: true
+  ENABLE_USER_ANALYTICS: true
+  ENABLE_ERROR_TRACKING: true
+  
+  # Experimental Features (disabled by default)
+  ENABLE_MACHINE_LEARNING: false
+  ENABLE_IOT_INTEGRATION: false
+  ENABLE_MOBILE_APP_API: false
+
+# =============================================================================
+# DEPLOYMENT CONFIGURATION
+# =============================================================================
+deployment:
+  # Image tags for different environments
+  images:
+    development: "agrotique:dev"
+    staging: "agrotique:staging"
+    production: "agrotique:latest"
+  
+  # Resource limits
+  resources:
+    development:
+      cpu_limit: "0.5"
+      memory_limit: "512Mi"
+    staging:
+      cpu_limit: "1"
+      memory_limit: "1Gi"
+    production:
+      cpu_limit: "2"
+      memory_limit: "2Gi"
+  
+  # Scaling configuration
+  scaling:
+    development:
+      replicas: 1
+      hpa_enabled: false
+    staging:
+      replicas: 2
+      hpa_enabled: true
+      min_replicas: 2
+      max_replicas: 5
+    production:
+      replicas: 3
+      hpa_enabled: true
+      min_replicas: 3
+      max_replicas: 10
