@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 
 from app.db.session import get_db
-from app.models import User, Garden
-from app.schemas import GardenCreate, GardenUpdate, GardenWithPlants, Garden as GardenSchema
-from app.crud import garden as crud_garden
+from models import User, Garden
+from schemas import GardenCreate, GardenUpdate, GardenWithPlants, Garden as GardenSchema
+from crud import garden as crud_garden
 from app.api.deps import get_current_active_user
 
 router = APIRouter()

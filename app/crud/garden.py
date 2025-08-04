@@ -4,8 +4,8 @@ from typing import Any, Dict, Optional, Union, List
 import uuid
 
 from app.crud.base import CRUDBase
-from app.models import Garden, User
-from app.schemas import GardenCreate, GardenUpdate
+from models import Garden, User
+from schemas import GardenCreate, GardenUpdate
 
 class CRUDGarden(CRUDBase[Garden, GardenCreate, GardenUpdate]):
     async def create_with_owner(

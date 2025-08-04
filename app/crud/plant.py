@@ -5,8 +5,8 @@ from typing import List, Optional
 import uuid
 
 from app.crud.base import CRUDBase
-from app.models import Plant
-from app.schemas import PlantCreate, PlantUpdate
+from models import Plant
+from schemas import PlantCreate, PlantUpdate
 
 class CRUDPlant(CRUDBase[Plant, PlantCreate, PlantUpdate]):
     async def get_with_garden(self, db: AsyncSession, *, id: uuid.UUID) -> Optional[Plant]:

@@ -4,7 +4,7 @@ from typing import Optional
 
 from app.crud.base import CRUDBase
 from app.models.plant_catalog import PlantCatalog
-from app.schemas.plant_catalog import PlantCatalogCreate, PlantCatalog as PlantCatalogSchema
+from schemas.plant_catalog import PlantCatalogCreate, PlantCatalog as PlantCatalogSchema
 
 class CRUDPlantCatalog(CRUDBase[PlantCatalog, PlantCatalogCreate, PlantCatalogSchema]):
     def get_multi(

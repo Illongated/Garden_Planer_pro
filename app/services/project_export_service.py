@@ -10,7 +10,7 @@ import zipfile
 from io import BytesIO
 
 from app.models.project import Project, ProjectVersion, ProjectComment, ProjectActivity
-from app.schemas.project import ProjectExport, ProjectImport, ProjectCreate
+from schemas.project import ProjectExport, ProjectImport, ProjectCreate
 from app.crud.project import project_crud
 
 class ProjectExportService:

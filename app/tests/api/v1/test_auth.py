@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from jose import jwt
 
 from app.core.config import settings
-from app.core import security
+from core import security
 
 def test_user_registration(client: TestClient, mock_email_service: dict[str, MagicMock]):
     """

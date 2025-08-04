@@ -3,8 +3,8 @@ from sqlalchemy.future import select
 from typing import Optional
 
 from app.crud.base import CRUDBase
-from app.models import User
-from app.schemas import UserCreate, UserUpdate
+from models import User
+from schemas import UserCreate, UserUpdate
 from app.core.security import verify_password, get_password_hash
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

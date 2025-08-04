@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 from scipy.spatial.distance import cdist
 
-from app.schemas.irrigation import (
+from schemas.irrigation import (
     HydraulicCalculationInput, HydraulicCalculationResult,
     PipeMaterial, IrrigationZone, IrrigationPipe
 )

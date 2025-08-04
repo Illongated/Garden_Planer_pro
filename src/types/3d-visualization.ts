@@ -1,5 +1,8 @@
 import { Vector3, Euler, Color } from 'three';
 
+// Re-export Three.js types for convenience
+export { Vector3, Euler, Color };
+
 // Camera and View Modes
 export type CameraMode = 'top-down' | 'isometric' | 'freelook' | 'walkthrough';
 export type ViewMode = '2d' | '3d';

@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 
 from app.db.session import get_db
-from app.models import User, Plant
-from app.schemas import PlantCreate, PlantUpdate, Plant as PlantSchema
-from app.crud import plant as crud_plant
-from app.crud import garden as crud_garden
+from models import User, Plant
+from schemas import PlantCreate, PlantUpdate, Plant as PlantSchema
+from crud import plant as crud_plant
+from crud import garden as crud_garden
 from app.api.deps import get_current_active_user
 
 router = APIRouter()

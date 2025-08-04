@@ -5,8 +5,8 @@ from fastapi.responses import Response, JSONResponse
 from redis.asyncio import Redis
 
 from app.api.v1.endpoints.auth import get_current_user
-from app.schemas.user import UserPublic
-from app.schemas.export import ProjectJSONExport
+from schemas.user import UserPublic
+from schemas.export import ProjectJSONExport
 from app.api.v1.endpoints.projects import fake_projects_db # Import fake DB
 from app.db.mock_data import PLANT_CATALOGUE
 from app.core.config import settings

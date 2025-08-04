@@ -19,4 +19,5 @@ const LoadingSpinner = ({ className }: { className?: string }) => {
   );
 };
 
+export { LoadingSpinner };
 export default LoadingSpinner;

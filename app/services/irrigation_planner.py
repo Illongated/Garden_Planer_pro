@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import asyncio
 
-from app.schemas.irrigation import (
+from schemas.irrigation import (
     ZoneInput, ZoneOutput, FlowInput, FlowOutput, WateringZone,
     ClusteringInput, ClusteringResult, HydraulicCalculationInput, HydraulicCalculationResult,
     EquipmentSelectionInput, EquipmentSelectionResult, WeatherForecastInput, WeatherForecastResult,

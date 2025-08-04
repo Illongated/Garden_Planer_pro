@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.project import Project, ProjectMember, ProjectVersion, ProjectComment, ProjectActivity, ProjectPermission, ProjectStatus
 from app.models.user import User
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectMemberCreate, ProjectVersionCreate, ProjectCommentCreate
+from schemas.project import ProjectCreate, ProjectUpdate, ProjectMemberCreate, ProjectVersionCreate, ProjectCommentCreate
 
 class ProjectCRUD:
     """CRUD operations for projects."""

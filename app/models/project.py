@@ -160,7 +160,7 @@ class ProjectActivity(Base):
     # Activity data
     activity_type: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., 'project_created', 'layout_updated'
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    activity_metadata: Mapped[Dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     
     # Relationships
     project: Mapped["Project"] = relationship("Project")

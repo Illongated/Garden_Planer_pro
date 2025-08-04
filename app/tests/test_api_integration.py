@@ -3,14 +3,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from datetime import date
 
-from app.main import app
+from main import app
 from app.models.user import User
 from app.models.garden import Garden
 from app.models.plant import Plant
 from app.models.plant_catalog import PlantCatalog
 from app.core.security import create_access_token
 from app.crud.user import user as user_crud
-from app.schemas.user import UserCreate
+from schemas.user import UserCreate
 
 
 class TestAuthEndpoints:

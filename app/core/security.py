@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 import bcrypt
 import jwt
 from fastapi import HTTPException, Request, Response, status
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, validator
 from sqlalchemy.ext.asyncio import AsyncSession

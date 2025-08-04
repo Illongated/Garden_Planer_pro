@@ -3,11 +3,11 @@ from sqlalchemy import func, and_, or_, desc, asc
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from app.models.project_management import (
-    Project, Task, Bug, ProjectCollaborator, ProjectMetrics, 
+    PMProject, Task, Bug, ProjectCollaborator, ProjectMetrics, 
     UserActivity, Feedback, Release, CodeReview
 )
 from app.models.user import User
-from app.schemas.project_management import (
+from schemas.project_management import (
     ProjectCreate, ProjectUpdate, TaskCreate, TaskUpdate,
     BugCreate, BugUpdate, FeedbackCreate, FeedbackUpdate,
     ReleaseCreate, ReleaseUpdate, CodeReviewCreate, CodeReviewUpdate
@@ -15,8 +15,8 @@ from app.schemas.project_management import (
 
 
 class ProjectCRUD:
-    def create(self, db: Session, project_data: ProjectCreate, owner_id: int) -> Project:
-        db_project = Project(
+    def create(self, db: Session, project_data: ProjectCreate, owner_id: int) -> PMProject:
+        db_project = PMProject(
             **project_data.dict(),
             owner_id=owner_id
         )
@@ -25,27 +25,27 @@ class ProjectCRUD:
         db.refresh(db_project)
         return db_project
 
-    def get(self, db: Session, project_id: int) -> Optional[Project]:
-        return db.query(Project).options(
-            joinedload(Project.owner),
-            joinedload(Project.collaborators).joinedload(ProjectCollaborator.user),
-            joinedload(Project.tasks),
-            joinedload(Project.bugs),
-            joinedload(Project.metrics)
-        ).filter(Project.id == project_id).first()
+    def get(self, db: Session, project_id: int) -> Optional[PMProject]:
+        return db.query(PMProject).options(
+            joinedload(PMProject.owner),
+            joinedload(PMProject.collaborators).joinedload(ProjectCollaborator.user),
+            joinedload(PMProject.tasks),
+            joinedload(PMProject.bugs),
+            joinedload(PMProject.metrics)
+        ).filter(PMProject.id == project_id).first()
 
-    def get_by_user(self, db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[Project]:
-        return db.query(Project).options(
-            joinedload(Project.owner),
-            joinedload(Project.collaborators)
+    def get_by_user(self, db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[PMProject]:
+        return db.query(PMProject).options(
+            joinedload(PMProject.owner),
+            joinedload(PMProject.collaborators)
         ).filter(
             or_(
-                Project.owner_id == user_id,
-                Project.collaborators.any(ProjectCollaborator.user_id == user_id)
+                PMProject.owner_id == user_id,
+                PMProject.collaborators.any(ProjectCollaborator.user_id == user_id)
             )
         ).offset(skip).limit(limit).all()
 
-    def update(self, db: Session, project_id: int, project_data: ProjectUpdate) -> Optional[Project]:
+    def update(self, db: Session, project_id: int, project_data: ProjectUpdate) -> Optional[PMProject]:
         db_project = self.get(db, project_id)
         if db_project:
             update_data = project_data.dict(exclude_unset=True)
