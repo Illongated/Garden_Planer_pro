@@ -6,13 +6,13 @@ python-multipart==0.0.6
 # Database
 sqlalchemy==2.0.23
 alembic==1.12.1
-sqlite3  # Built-in, no need to install
+# sqlite3 = c'est pas une lib
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
-fastapi-csrf-protect==0.1.0
+# j'ai enlevé la lib fastapi crf qui n'etais plus à jour
 
 # Email
 fastapi-mail==1.4.1
@@ -37,3 +37,5 @@ redis==5.0.1
 
 # Optional: Prometheus for monitoring (can be disabled)
 prometheus-client==0.19.0
+
+PyJWT>=2.0 # il manquait cette lib

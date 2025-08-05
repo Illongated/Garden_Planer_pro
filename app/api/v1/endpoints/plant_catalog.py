@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-import crud
-from api import deps
-from schemas.plant_catalog import PaginatedPlantCatalog, PlantCatalog
+import app.crud
+from app.api import deps
+from app.schemas.plant_catalog import PaginatedPlantCatalog, PlantCatalog
 
 router = APIRouter()
 

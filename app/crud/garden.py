@@ -3,10 +3,9 @@ from sqlalchemy.future import select
 from typing import Any, Dict, Optional, Union, List
 import uuid
 
-from crud.base import CRUDBase
-from models import Garden, User
-from schemas import GardenCreate, GardenUpdate
-
+from app.crud.base import CRUDBase
+from app.models import Garden, User
+from app.schemas import GardenCreate, GardenUpdate
 class CRUDGarden(CRUDBase[Garden, GardenCreate, GardenUpdate]):
     async def create_with_owner(
         self, db: AsyncSession, *, obj_in: GardenCreate, owner_id: uuid.UUID

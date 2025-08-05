@@ -12,16 +12,16 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 
-from core import security
-from core.config import settings
-from schemas import UserCreate, UserPublic, Token, Message
-from db.session import get_db
-from models import User
-from crud import user as crud_user
-from api.deps import get_current_active_user, get_current_user
-from core.limiter import limiter
-from core.logging import security_logger
-from services.email_service import email_service
+from app.core import security
+from app.core.config import settings
+from app.schemas import UserCreate, UserPublic, Token, Message
+from app.db.session import get_db
+from app.models import User
+from app.crud import user as crud_user
+from app.api.deps import get_current_active_user, get_current_user
+from app.core.limiter import limiter
+from app.core.logging import security_logger
+from app.services.email_service import email_service
 
 router = APIRouter()
 

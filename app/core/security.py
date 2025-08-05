@@ -24,8 +24,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.config import settings
-from db.session import get_db
+from app.core.config import settings
+from app.db.session import get_db
 
 # Configure security logging
 security_logger = logging.getLogger("security")

@@ -6,7 +6,7 @@ import uuid
 from sqlalchemy import String, DateTime, Text, Boolean, ForeignKey, JSON, Float, Enum, Integer, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-from models.base import Base
+from app.models.base import Base
 import enum
 
 

@@ -9,9 +9,9 @@ import tempfile
 import zipfile
 from io import BytesIO
 
-from models.project import Project, ProjectVersion, ProjectComment, ProjectActivity
-from schemas.project import ProjectExport, ProjectImport, ProjectCreate
-from crud.project import project_crud
+from app.models.project import Project, ProjectVersion, ProjectComment, ProjectActivity
+from app.schemas.project import ProjectExport, ProjectImport, ProjectCreate
+from app.crud.project import project_crud
 
 class ProjectExportService:
     """Service for exporting and importing projects in various formats."""

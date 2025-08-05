@@ -7,14 +7,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_current_user, get_db
-from models.user import User
-from services.agronomic_engine import (
+from app.api.deps import get_current_user, get_db
+from app.models.user import User
+from app.services.agronomic_engine import (
     AgronomicEngine, PlantSpecs, GardenZone, PlantPlacement,
     PlantType, WaterNeed, SunExposure, GrowthStage
 )
-from services.websocket_manager import WebSocketManager
-from core.config import settings
+from app.services.websocket_manager import WebSocketManager
+from app.core.config import settings
 import redis.asyncio as redis
 
 router = APIRouter()

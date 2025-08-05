@@ -1,6 +1,6 @@
 from sqlalchemy import String, Text, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
-from models.base import Base
+from app.models.base import Base
 
 class PlantCatalog(Base):
     """

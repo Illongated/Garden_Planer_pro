@@ -5,7 +5,7 @@ from enum import Enum
 from sqlalchemy import String, ForeignKey, Float, Text, Boolean, JSON, Integer, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-from models.base import Base
+from app.models.base import Base
 from typing import TYPE_CHECKING, Dict, Any, List
 
 if TYPE_CHECKING:

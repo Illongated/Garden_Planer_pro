@@ -3,11 +3,11 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from models.irrigation import (
+from app.models.irrigation import (
     IrrigationZone, IrrigationEquipment, IrrigationSchedule, 
     WeatherData, IrrigationProject, EquipmentType, ZoneStatus, ScheduleType
 )
-from schemas.irrigation import (
+from app.schemas.irrigation import (
     IrrigationZoneCreate, IrrigationZoneUpdate,
     IrrigationEquipmentCreate, IrrigationEquipmentUpdate,
     IrrigationScheduleCreate, IrrigationScheduleUpdate,
