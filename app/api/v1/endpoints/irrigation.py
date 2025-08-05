@@ -1,11 +1,10 @@
 from typing import List, Dict, Any, Optional
-from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 import base64
 from datetime import datetime
 
-from schemas.irrigation import (
+from app.schemas.irrigation import (
     ZoneInput, ZoneOutput, FlowInput, FlowOutput, WateringZone,
     ClusteringInput, ClusteringResult, HydraulicCalculationInput, HydraulicCalculationResult,
     EquipmentSelectionInput, EquipmentSelectionResult, WeatherForecastInput, WeatherForecastResult,
@@ -16,14 +15,14 @@ from schemas.irrigation import (
     WeatherDataCreate, WeatherData as WeatherDataSchema, IrrigationProjectCreate, IrrigationProjectUpdate,
     IrrigationProject as IrrigationProjectSchema
 )
-from services.irrigation_planner import IrrigationPlanner
-from services.hydraulic_engine import HydraulicEngine
-from services.clustering_engine import ClusteringEngine
-from services.weather_service import WeatherService
-from services.technical_export import TechnicalExportService
-from api.deps import get_current_user, get_db
-from schemas.user import UserPublic
-from crud.irrigation import (
+from app.services.irrigation_planner import IrrigationPlanner
+from app.services.hydraulic_engine import HydraulicEngine
+from app.services.clustering_engine import ClusteringEngine
+from app.services.weather_service import WeatherService
+from app.services.technical_export import TechnicalExportService
+from app.api.deps import get_current_user, get_db
+from app.schemas.user import UserPublic
+from app.crud.irrigation import (
     irrigation_zone_crud, irrigation_equipment_crud, irrigation_schedule_crud,
     weather_data_crud, irrigation_project_crud
 )
@@ -197,7 +196,7 @@ def create_irrigation_zone(
 
 @router.get("/zones", response_model=List[IrrigationZoneSchema])
 def get_irrigation_zones(
-    garden_id: Optional[UUID] = None,
+    garden_id: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -211,7 +210,7 @@ def get_irrigation_zones(
 
 @router.get("/zones/{zone_id}", response_model=IrrigationZoneSchema)
 def get_irrigation_zone(
-    zone_id: UUID,
+    zone_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -224,7 +223,7 @@ def get_irrigation_zone(
 
 @router.put("/zones/{zone_id}", response_model=IrrigationZoneSchema)
 def update_irrigation_zone(
-    zone_id: UUID,
+    zone_id: str,
     zone_in: IrrigationZoneUpdate,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
@@ -240,7 +239,7 @@ def update_irrigation_zone(
 
 @router.delete("/zones/{zone_id}")
 def delete_irrigation_zone(
-    zone_id: UUID,
+    zone_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -278,7 +277,7 @@ def get_irrigation_equipment(
 
 @router.get("/equipment/{equipment_id}", response_model=IrrigationEquipmentSchema)
 def get_irrigation_equipment_by_id(
-    equipment_id: UUID,
+    equipment_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -293,7 +292,7 @@ def get_irrigation_equipment_by_id(
 
 @router.put("/equipment/{equipment_id}", response_model=IrrigationEquipmentSchema)
 def update_irrigation_equipment(
-    equipment_id: UUID,
+    equipment_id: str,
     equipment_in: IrrigationEquipmentUpdate,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
@@ -309,7 +308,7 @@ def update_irrigation_equipment(
 
 @router.delete("/equipment/{equipment_id}")
 def delete_irrigation_equipment(
-    equipment_id: UUID,
+    equipment_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -333,7 +332,7 @@ def create_irrigation_schedule(
 
 @router.get("/schedules", response_model=List[IrrigationScheduleSchema])
 def get_irrigation_schedules(
-    zone_id: Optional[UUID] = None,
+    zone_id: Optional[str] = None,
     schedule_type: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
@@ -348,7 +347,7 @@ def get_irrigation_schedules(
 
 @router.get("/schedules/{schedule_id}", response_model=IrrigationScheduleSchema)
 def get_irrigation_schedule_by_id(
-    schedule_id: UUID,
+    schedule_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -363,7 +362,7 @@ def get_irrigation_schedule_by_id(
 
 @router.put("/schedules/{schedule_id}", response_model=IrrigationScheduleSchema)
 def update_irrigation_schedule(
-    schedule_id: UUID,
+    schedule_id: str,
     schedule_in: IrrigationScheduleUpdate,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
@@ -379,7 +378,7 @@ def update_irrigation_schedule(
 
 @router.delete("/schedules/{schedule_id}")
 def delete_irrigation_schedule(
-    schedule_id: UUID,
+    schedule_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -403,7 +402,7 @@ def create_weather_data(
 
 @router.get("/weather-data", response_model=List[WeatherDataSchema])
 def get_weather_data(
-    garden_id: Optional[UUID] = None,
+    garden_id: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     skip: int = 0,
@@ -431,7 +430,7 @@ def create_irrigation_project(
 
 @router.get("/projects", response_model=List[IrrigationProjectSchema])
 def get_irrigation_projects(
-    garden_id: Optional[UUID] = None,
+    garden_id: Optional[str] = None,
     is_active: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100,
@@ -446,7 +445,7 @@ def get_irrigation_projects(
 
 @router.get("/projects/{project_id}", response_model=IrrigationProjectSchema)
 def get_irrigation_project_by_id(
-    project_id: UUID,
+    project_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):
@@ -461,7 +460,7 @@ def get_irrigation_project_by_id(
 
 @router.put("/projects/{project_id}", response_model=IrrigationProjectSchema)
 def update_irrigation_project(
-    project_id: UUID,
+    project_id: str,
     project_in: IrrigationProjectUpdate,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
@@ -477,7 +476,7 @@ def update_irrigation_project(
 
 @router.delete("/projects/{project_id}")
 def delete_irrigation_project(
-    project_id: UUID,
+    project_id: str,
     db: Session = Depends(get_db),
     current_user: UserPublic = Depends(get_current_user),
 ):

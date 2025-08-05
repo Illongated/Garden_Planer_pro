@@ -1,4 +1,4 @@
-from sqlalchemy import String, Text, ARRAY
+from sqlalchemy import String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
@@ -8,6 +8,8 @@ class PlantCatalog(Base):
     This is static data, not a user's specific plant instance.
     """
     __tablename__ = "plant_catalog"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     variety: Mapped[str | None] = mapped_column(String, nullable=True)
     plant_type: Mapped[str | None] = mapped_column(String, index=True, nullable=True)
@@ -16,9 +18,9 @@ class PlantCatalog(Base):
     sun: Mapped[str | None] = mapped_column(String, nullable=True)
     water: Mapped[str | None] = mapped_column(String, nullable=True)
     spacing: Mapped[str | None] = mapped_column(String, nullable=True)
-    planting_season: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
-    harvest_season: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
-    compatibility: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+    planting_season: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    harvest_season: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    compatibility: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     tips: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self):

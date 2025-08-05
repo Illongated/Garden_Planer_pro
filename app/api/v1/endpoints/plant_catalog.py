@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-import app.crud
+from app.crud import plant_catalog as plant_catalog_crud
 from app.api import deps
 from app.schemas.plant_catalog import PaginatedPlantCatalog, PlantCatalog
 
@@ -22,7 +22,7 @@ def read_plant_catalog(
     Retrieve plants from the catalog with pagination and filtering.
     """
     skip = (page - 1) * page_size
-    plants, total = crud.plant_catalog.get_multi(
+    plants, total = plant_catalog_crud.get_multi(
         db, skip=skip, limit=page_size, q=q, plant_type=plant_type, season=season, sun=sun
     )
     return PaginatedPlantCatalog(
@@ -37,13 +37,12 @@ def get_plant_types(db: Session = Depends(deps.get_db)):
     """
     Get a list of unique plant types.
     """
-    types = crud.plant_catalog.get_plant_types(db)
+    types = plant_catalog_crud.get_plant_types(db)
     return [t[0] for t in types if t[0]]
-
 
 @router.get("/seasons", response_model=List[str])
 def get_planting_seasons(db: Session = Depends(deps.get_db)):
     """
     Get a list of unique planting seasons.
     """
-    return crud.plant_catalog.get_planting_seasons(db)
+    return plant_catalog_crud.get_planting_seasons(db)

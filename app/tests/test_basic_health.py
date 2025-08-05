@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 def test_health_endpoint_exists():
     """Test that we can at least import the app and access health endpoint"""
     try:
-        from main import app
+        from app.main import app
         client = TestClient(app)
         response = client.get("/health")
         # Should return 200 or at least not crash
@@ -21,7 +21,7 @@ def test_health_endpoint_exists():
 def test_root_endpoint():
     """Test that root endpoint works"""
     try:
-        from main import app
+        from app.main import app
         client = TestClient(app)
         response = client.get("/")
         assert response.status_code == 200
@@ -34,7 +34,7 @@ def test_root_endpoint():
 def test_openapi_docs():
     """Test that OpenAPI docs are accessible"""
     try:
-        from main import app
+        from app.main import app
         client = TestClient(app)
         response = client.get("/docs")
         # Should redirect or return docs
@@ -46,7 +46,7 @@ def test_openapi_docs():
 def test_app_creation():
     """Test that the app can be created without errors"""
     try:
-        from main import app
+        from app.main import app
         assert app is not None
         assert hasattr(app, 'routes')
         print(f"✅ App created successfully with {len(app.routes)} routes")

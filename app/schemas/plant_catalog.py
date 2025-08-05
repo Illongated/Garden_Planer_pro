@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 # Shared properties
@@ -24,8 +24,7 @@ class PlantCatalogCreate(PlantCatalogBase):
 class PlantCatalog(PlantCatalogBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)  # Compatibilité Pydantic v2+
 
 # Properties for paginated response
 class PaginatedPlantCatalog(BaseModel):

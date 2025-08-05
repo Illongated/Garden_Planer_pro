@@ -1,13 +1,11 @@
-import uuid
 from datetime import datetime
-from sqlalchemy import DateTime, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, func, Integer
 from sqlalchemy.orm import as_declarative, Mapped, mapped_column, declared_attr
 
 @as_declarative()
 class Base:
     """Base class for all SQLAlchemy models."""
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 

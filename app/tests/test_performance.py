@@ -6,11 +6,11 @@ from typing import List, Dict, Any
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from main import app
-from models.user import User
-from models.garden import Garden
-from models.plant import Plant
-from models.plant_catalog import PlantCatalog
+from app.main import app
+from app.models.user import User
+from app.models.garden import Garden
+from app.models.plant import Plant
+from app.models.plant_catalog import PlantCatalog
 
 
 class TestResponseTime:

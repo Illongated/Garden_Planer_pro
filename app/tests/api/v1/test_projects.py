@@ -1,6 +1,6 @@
 import uuid
 from fastapi.testclient import TestClient
-from core import security
+from app.core import security
 
 # --- Helper function to get a valid token ---
 def get_auth_token(client: TestClient, email_prefix: str) -> str:

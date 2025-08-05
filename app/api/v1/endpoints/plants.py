@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-import uuid
 
 from app.db.session import get_db
 from app.models import User, Plant
@@ -34,7 +33,7 @@ async def create_plant(
 async def read_plant(
     *,
     db: AsyncSession = Depends(get_db),
-    plant_id: uuid.UUID,
+    plant_id: str,
     current_user: User = Depends(get_current_active_user)
 ):
     """
@@ -51,7 +50,7 @@ async def read_plant(
 async def read_plants_by_garden(
     *,
     db: AsyncSession = Depends(get_db),
-    garden_id: uuid.UUID,
+    garden_id: str,
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_user)
@@ -72,7 +71,7 @@ async def read_plants_by_garden(
 async def update_plant(
     *,
     db: AsyncSession = Depends(get_db),
-    plant_id: uuid.UUID,
+    plant_id: str,
     plant_in: PlantUpdate,
     current_user: User = Depends(get_current_active_user)
 ):
@@ -91,7 +90,7 @@ async def update_plant(
 async def delete_plant(
     *,
     db: AsyncSession = Depends(get_db),
-    plant_id: uuid.UUID,
+    plant_id: str,
     current_user: User = Depends(get_current_active_user)
 ):
     """

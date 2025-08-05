@@ -1,4 +1,9 @@
-from typing import Dict, List, Optional, Any
+"""
+API routes for the Agronomic Engine (analysis, optimization, incremental update, websocket, health).
+Compatible with SQLite and Postgres backends.
+"""
+
+from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 import asyncio
 import json
@@ -34,10 +39,10 @@ class PlantSpecsRequest(BaseModel):
     width_max: float = Field(..., gt=0)
     root_depth: float = Field(..., gt=0)
     yield_per_plant: float = Field(..., gt=0)
-    companion_plants: List[str] = []
-    incompatible_plants: List[str] = []
+    companion_plants: List[str] = Field(default_factory=list)
+    incompatible_plants: List[str] = Field(default_factory=list)
     water_consumption_daily: float = 0.0
-    nutrient_requirements: Dict[str, float] = {}
+    nutrient_requirements: Dict[str, float] = Field(default_factory=dict)
     frost_tolerance: bool = False
     heat_tolerance: bool = False
 
@@ -51,7 +56,7 @@ class GardenZoneRequest(BaseModel):
     water_availability: float = Field(..., gt=0)
     elevation: float = 0.0
     slope: float = Field(..., ge=0, le=90)
-    coordinates: tuple[float, float] = (0.0, 0.0)
+    coordinates: Tuple[float, float] = (0.0, 0.0)
 
 class PlantPlacementRequest(BaseModel):
     plant_id: str
@@ -65,8 +70,8 @@ class PlantPlacementRequest(BaseModel):
     nutrient_stress: float = Field(0.0, ge=0, le=1)
 
 class EnvironmentalDataRequest(BaseModel):
-    weather: Dict[str, Any] = {}
-    sun_data: Dict[str, Any] = {}
+    weather: Dict[str, Any] = Field(default_factory=dict)
+    sun_data: Dict[str, Any] = Field(default_factory=dict)
     soil_moisture: float = Field(0.5, ge=0, le=1)
     temperature: float = 20.0
     humidity: float = Field(0.5, ge=0, le=1)
@@ -77,10 +82,10 @@ class OptimizationConstraintsRequest(BaseModel):
     max_plants: Optional[int] = None
     min_spacing: float = 0.3
     max_water_usage: Optional[float] = None
-    preferred_zones: List[str] = []
-    excluded_zones: List[str] = []
-    companion_plant_preferences: Dict[str, List[str]] = {}
-    incompatible_plant_restrictions: Dict[str, List[str]] = {}
+    preferred_zones: List[str] = Field(default_factory=list)
+    excluded_zones: List[str] = Field(default_factory=list)
+    companion_plant_preferences: Dict[str, List[str]] = Field(default_factory=dict)
+    incompatible_plant_restrictions: Dict[str, List[str]] = Field(default_factory=dict)
 
 class AnalysisResponse(BaseModel):
     water_analysis: Dict[str, Any]
@@ -142,7 +147,6 @@ async def analyze_garden(
                 frost_tolerance=placement_req.plant_specs.frost_tolerance,
                 heat_tolerance=placement_req.plant_specs.heat_tolerance
             )
-            
             placement = PlantPlacement(
                 plant_id=placement_req.plant_id,
                 plant_specs=plant_specs,
@@ -155,7 +159,6 @@ async def analyze_garden(
                 nutrient_stress=placement_req.nutrient_stress
             )
             plant_placements.append(placement)
-        
         zones = []
         for zone_req in garden_zones:
             zone = GardenZone(
@@ -171,7 +174,6 @@ async def analyze_garden(
                 coordinates=zone_req.coordinates
             )
             zones.append(zone)
-        
         # Prepare environmental data
         env_data = {
             'weather': environmental_data.weather,
@@ -180,21 +182,17 @@ async def analyze_garden(
             'temperature_stress': max(0, abs(environmental_data.temperature - 20) / 20),
             'humidity_stress': abs(environmental_data.humidity - 0.6) / 0.6
         }
-        
         # Perform comprehensive analysis
         analysis_result = await agronomic_engine.calculate_comprehensive_analysis(
             plant_placements, zones, env_data
         )
-        
         # Cache the result
         cache_key = f"analysis_{current_user.id}_{hash(str(placements) + str(zones))}"
         computation_cache[cache_key] = {
             'result': analysis_result,
             'timestamp': datetime.now().isoformat()
         }
-        
         return AnalysisResponse(**analysis_result)
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
@@ -212,8 +210,6 @@ async def optimize_placement(
     try:
         import time
         start_time = time.time()
-        
-        # Convert request models to internal models
         plant_specs_list = []
         for plant_req in plants:
             plant_specs = PlantSpecs(
@@ -236,7 +232,6 @@ async def optimize_placement(
                 heat_tolerance=plant_req.heat_tolerance
             )
             plant_specs_list.append(plant_specs)
-        
         zones = []
         for zone_req in garden_zones:
             zone = GardenZone(
@@ -252,8 +247,6 @@ async def optimize_placement(
                 coordinates=zone_req.coordinates
             )
             zones.append(zone)
-        
-        # Prepare constraints
         optimization_constraints = {
             'max_plants': constraints.max_plants,
             'min_spacing': constraints.min_spacing,
@@ -263,32 +256,19 @@ async def optimize_placement(
             'companion_preferences': constraints.companion_plant_preferences,
             'incompatible_restrictions': constraints.incompatible_plant_restrictions
         }
-        
-        # Perform optimization
         optimized_placements = await agronomic_engine.optimize_placement(
             plant_specs_list, zones, optimization_constraints
         )
-        
         computation_time = time.time() - start_time
-        
-        # Calculate metrics for response
         conflicts = await agronomic_engine.conflict_detector.detect_conflicts(optimized_placements, zones)
         total_conflicts = sum(len(conflicts.get(key, [])) for key in conflicts)
-        
-        # Calculate water efficiency
         water_analysis = await agronomic_engine.irrigation_planner.calculate_irrigation_zones(
             optimized_placements, zones, {}
         )
         water_efficiency = water_analysis.get('efficiency_score', 0.0)
-        
-        # Calculate space utilization
         total_area = sum(zone.area for zone in zones)
         space_utilization = len(optimized_placements) / max(total_area, 1.0)
-        
-        # Calculate fitness score
         fitness_score = len(optimized_placements) * 10 - total_conflicts * 5
-        
-        # Convert placements to dict format for response
         placement_dicts = []
         for placement in optimized_placements:
             placement_dict = {
@@ -303,7 +283,6 @@ async def optimize_placement(
                 'nutrient_stress': placement.nutrient_stress
             }
             placement_dicts.append(placement_dict)
-        
         return OptimizationResponse(
             optimized_placements=placement_dicts,
             fitness_score=fitness_score,
@@ -312,7 +291,6 @@ async def optimize_placement(
             space_utilization=space_utilization,
             computation_time=computation_time
         )
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
 
@@ -329,7 +307,6 @@ async def calculate_incremental_update(
     Calculate incremental updates when a single plant is added/modified.
     """
     try:
-        # Convert current placements
         current_plant_placements = []
         for placement_req in current_placements:
             plant_specs = PlantSpecs(
@@ -351,7 +328,6 @@ async def calculate_incremental_update(
                 frost_tolerance=placement_req.plant_specs.frost_tolerance,
                 heat_tolerance=placement_req.plant_specs.heat_tolerance
             )
-            
             placement = PlantPlacement(
                 plant_id=placement_req.plant_id,
                 plant_specs=plant_specs,
@@ -364,8 +340,6 @@ async def calculate_incremental_update(
                 nutrient_stress=placement_req.nutrient_stress
             )
             current_plant_placements.append(placement)
-        
-        # Convert new placement
         new_plant_specs = PlantSpecs(
             name=new_placement.plant_specs.name,
             type=new_placement.plant_specs.type,
@@ -385,7 +359,6 @@ async def calculate_incremental_update(
             frost_tolerance=new_placement.plant_specs.frost_tolerance,
             heat_tolerance=new_placement.plant_specs.heat_tolerance
         )
-        
         new_plant_placement = PlantPlacement(
             plant_id=new_placement.plant_id,
             plant_specs=new_plant_specs,
@@ -397,8 +370,6 @@ async def calculate_incremental_update(
             water_stress=new_placement.water_stress,
             nutrient_stress=new_placement.nutrient_stress
         )
-        
-        # Convert zones
         zones = []
         for zone_req in garden_zones:
             zone = GardenZone(
@@ -414,8 +385,6 @@ async def calculate_incremental_update(
                 coordinates=zone_req.coordinates
             )
             zones.append(zone)
-        
-        # Prepare environmental data
         env_data = {
             'weather': environmental_data.weather,
             'sun_data': environmental_data.sun_data,
@@ -423,14 +392,10 @@ async def calculate_incremental_update(
             'temperature_stress': max(0, abs(environmental_data.temperature - 20) / 20),
             'humidity_stress': abs(environmental_data.humidity - 0.6) / 0.6
         }
-        
-        # Calculate incremental update
         incremental_result = await agronomic_engine.calculate_incremental_update(
             current_plant_placements, new_plant_placement, zones, env_data
         )
-        
         return IncrementalUpdateResponse(**incremental_result)
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Incremental update failed: {str(e)}")
 
@@ -471,48 +436,31 @@ async def agronomic_websocket(
     WebSocket endpoint for real-time agronomic updates.
     """
     await websocket.accept()
-    
     try:
-        # Add to websocket manager
         websocket_manager.add_connection(user_id, websocket)
-        
-        # Send initial connection confirmation
         await websocket.send_text(json.dumps({
             "type": "connection_established",
             "user_id": user_id,
             "timestamp": datetime.now().isoformat()
         }))
-        
-        # Keep connection alive and handle incoming messages
         while True:
             try:
-                # Wait for messages from client
                 data = await websocket.receive_text()
                 message = json.loads(data)
-                
-                # Handle different message types
                 if message.get("type") == "subscribe_analysis":
-                    # Subscribe to analysis updates
                     await websocket_manager.subscribe_to_analysis(user_id, message.get("garden_id"))
-                    
                 elif message.get("type") == "request_optimization":
-                    # Handle optimization requests
                     await handle_optimization_request(websocket, message, user_id)
-                    
                 elif message.get("type") == "ping":
-                    # Respond to ping
                     await websocket.send_text(json.dumps({
                         "type": "pong",
                         "timestamp": datetime.now().isoformat()
                     }))
-                    
             except WebSocketDisconnect:
                 break
-                
     except WebSocketDisconnect:
         pass
     finally:
-        # Remove from websocket manager
         websocket_manager.remove_connection(user_id)
 
 async def handle_optimization_request(websocket: WebSocket, message: Dict, user_id: str):
@@ -520,12 +468,9 @@ async def handle_optimization_request(websocket: WebSocket, message: Dict, user_
     Handle optimization requests via WebSocket.
     """
     try:
-        # Extract optimization parameters from message
         plants_data = message.get("plants", [])
         zones_data = message.get("zones", [])
         constraints_data = message.get("constraints", {})
-        
-        # Convert to internal models (simplified for WebSocket)
         plants = []
         for plant_data in plants_data:
             plant_specs = PlantSpecs(
@@ -544,7 +489,6 @@ async def handle_optimization_request(websocket: WebSocket, message: Dict, user_
                 incompatible_plants=plant_data.get("incompatible_plants", [])
             )
             plants.append(plant_specs)
-        
         zones = []
         for zone_data in zones_data:
             zone = GardenZone(
@@ -560,19 +504,13 @@ async def handle_optimization_request(websocket: WebSocket, message: Dict, user_
                 coordinates=zone_data.get("coordinates", (0.0, 0.0))
             )
             zones.append(zone)
-        
-        # Send progress updates
         await websocket.send_text(json.dumps({
             "type": "optimization_started",
             "timestamp": datetime.now().isoformat()
         }))
-        
-        # Perform optimization
         optimized_placements = await agronomic_engine.optimize_placement(
             plants, zones, constraints_data
         )
-        
-        # Send results
         placement_results = []
         for placement in optimized_placements:
             placement_result = {
@@ -584,13 +522,11 @@ async def handle_optimization_request(websocket: WebSocket, message: Dict, user_
                 "current_stage": placement.current_stage.value
             }
             placement_results.append(placement_result)
-        
         await websocket.send_text(json.dumps({
             "type": "optimization_completed",
             "placements": placement_results,
             "timestamp": datetime.now().isoformat()
         }))
-        
     except Exception as e:
         await websocket.send_text(json.dumps({
             "type": "error",
@@ -608,7 +544,6 @@ async def broadcast_agronomic_update(
     Broadcast agronomic updates to all connected clients for a specific garden.
     """
     try:
-        # Prepare update message
         message = {
             "type": "agronomic_update",
             "garden_id": garden_id,
@@ -616,12 +551,8 @@ async def broadcast_agronomic_update(
             "timestamp": datetime.now().isoformat(),
             "user_id": str(current_user.id)
         }
-        
-        # Broadcast to all connected clients for this garden
         await websocket_manager.broadcast_to_garden(garden_id, message)
-        
         return {"message": "Update broadcasted successfully"}
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Broadcast failed: {str(e)}")
 
@@ -636,4 +567,4 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "cache_size": len(computation_cache),
         "active_connections": len(websocket_manager.active_connections)
-    } 
+    }

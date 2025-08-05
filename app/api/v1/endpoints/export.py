@@ -1,22 +1,21 @@
 import json
-import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response, JSONResponse
 from redis.asyncio import Redis
 
-from api.v1.endpoints.auth import get_current_user
-from schemas.user import UserPublic
-from schemas.export import ProjectJSONExport
-from api.v1.endpoints.projects import fake_projects_db # Import fake DB
-from db.mock_data import PLANT_CATALOGUE
-from core.config import settings
+from app.api.v1.endpoints.auth import get_current_user
+from app.schemas.user import UserPublic
+from app.schemas.export import ProjectJSONExport
+from app.api.v1.endpoints.projects import fake_projects_db  # Import fake DB
+from app.db.mock_data import PLANT_CATALOGUE
+from app.core.config import settings
 
 router = APIRouter()
 
 def get_redis(request: Request) -> Redis:
     return request.app.state.redis
 
-async def get_project_for_export(project_id: uuid.UUID, current_user: UserPublic) -> dict:
+async def get_project_for_export(project_id: str, current_user: UserPublic) -> dict:
     """Helper to get and validate a project for export."""
     project = fake_projects_db.get(project_id)
     if not project or project["owner_id"] != current_user.id:
@@ -25,7 +24,7 @@ async def get_project_for_export(project_id: uuid.UUID, current_user: UserPublic
 
 @router.get("/json", response_model=ProjectJSONExport)
 async def export_project_json(
-    project_id: uuid.UUID = Query(...),
+    project_id: str = Query(...),  # <-- str, pas UUID
     current_user: UserPublic = Depends(get_current_user),
     redis: Redis = Depends(get_redis)
 ):
@@ -53,7 +52,7 @@ async def export_project_json(
 
 @router.get("/pdf")
 async def export_project_pdf(
-    project_id: uuid.UUID = Query(...),
+    project_id: str = Query(...),  # <-- str, pas UUID
     current_user: UserPublic = Depends(get_current_user),
     redis: Redis = Depends(get_redis)
 ):
@@ -76,7 +75,7 @@ async def export_project_pdf(
 
 @router.get("/png")
 async def export_project_png(
-    project_id: uuid.UUID = Query(...),
+    project_id: str = Query(...),  # <-- str, pas UUID
     current_user: UserPublic = Depends(get_current_user),
     redis: Redis = Depends(get_redis)
 ):

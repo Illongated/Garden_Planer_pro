@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 
 client = TestClient(app)
 
@@ -21,5 +21,5 @@ def test_docs_endpoint():
 
 def test_main_import():
     """Test that the main module can be imported"""
-    import main
-    assert main.app is not None 
+    import app.main
+    assert app.main.app is not None

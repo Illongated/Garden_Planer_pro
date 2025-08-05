@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-import uuid
 
 from app.db.session import get_db
-from app.models import User, Garden
-from app.schemas import GardenCreate, GardenUpdate, GardenWithPlants, Garden as GardenSchema
+from app.models.user import User
+from app.models.garden import Garden
+from app.schemas.garden import GardenCreate, GardenUpdate, GardenWithPlants, Garden as GardenSchema
 from app.crud import garden as crud_garden
 from app.api.deps import get_current_active_user
 
@@ -40,7 +40,7 @@ async def read_gardens(
 async def read_garden(
     *,
     db: AsyncSession = Depends(get_db),
-    garden_id: uuid.UUID,
+    garden_id: str,  # <-- STR !
     current_user: User = Depends(get_current_active_user)
 ):
     """
@@ -57,7 +57,7 @@ async def read_garden(
 async def update_garden(
     *,
     db: AsyncSession = Depends(get_db),
-    garden_id: uuid.UUID,
+    garden_id: str,  # <-- STR !
     garden_in: GardenUpdate,
     current_user: User = Depends(get_current_active_user)
 ):
@@ -76,7 +76,7 @@ async def update_garden(
 async def delete_garden(
     *,
     db: AsyncSession = Depends(get_db),
-    garden_id: uuid.UUID,
+    garden_id: str,  # <-- STR !
     current_user: User = Depends(get_current_active_user)
 ):
     """

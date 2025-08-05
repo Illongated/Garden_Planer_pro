@@ -7,6 +7,7 @@ import asyncio
 from unittest.mock import MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 import os
 
@@ -24,7 +25,7 @@ os.environ.update({
     "SMTP_USER": "test",
     "SMTP_PASSWORD": "test",
     "EMAILS_FROM_EMAIL": "test@example.com",
-            "CLIENT_URL": "http://localhost:5173",
+    "CLIENT_URL": "http://localhost:5173",
     "CSRF_SECRET": "test-csrf-secret-key"
 })
 
@@ -70,3 +71,58 @@ def authenticated_client(client, mock_email_service):
     # This would create a user and return an authenticated client
     # For now, just return the regular client
     return client
+
+# ------------- SQLAlchemy DB & Model Fixtures for Unit Tests -------------
+
+from app.models.base import Base
+
+@pytest.fixture(scope="session")
+def db_engine():
+    """Engine SQLite pour tests avec Base créée et détruite à la session."""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    yield engine
+    engine.dispose()
+
+@pytest.fixture(scope="function")
+def db_session(db_engine) -> Session:
+    """Session SQLAlchemy pour tests unitaires, rollback à la fin."""
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+
+@pytest.fixture(scope="function")
+def db(db_session):
+    """Alias pour db_session (compatibilité)."""
+    return db_session
+
+# --- Example ready-to-use objects for testing relations ---
+
+from app.models.user import User
+from app.models.garden import Garden
+
+@pytest.fixture
+def test_user(db_session):
+    """User de test pour relier les modèles."""
+    user = User(email="testuser@example.com", full_name="Test User", hashed_password="hashed")
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+@pytest.fixture
+def test_garden(db_session, test_user):
+    """Garden de test lié à un user."""
+    garden = Garden(name="Test Garden", owner_id=test_user.id, width=10, length=20)
+    db_session.add(garden)
+    db_session.commit()
+    db_session.refresh(garden)
+    return garden
